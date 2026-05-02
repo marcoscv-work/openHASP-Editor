@@ -38,7 +38,7 @@ After pushing to `main`, enable GitHub Pages in the repository settings with Git
 - `config/project.example.json`: reusable project configuration example.
 - `config/bindings.openhasp.example.json`: example object-to-Home-Assistant bindings.
 - `pages_*.jsonl`: sample openHASP pages.
-- `Imagenes OpenHASP Vero/`: sample assets for `L:/...` image paths.
+- `sample-assets/`: sample assets for `L:/...` image paths.
 
 ## Notes
 

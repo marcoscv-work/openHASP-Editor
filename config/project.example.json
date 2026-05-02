@@ -9,8 +9,8 @@
     }
   },
   "viewer": {
-    "pagesFile": "pages_480_vero.jsonl",
-    "assetBase": "Imagenes OpenHASP Vero"
+    "pagesFile": "pages_480_sample.jsonl",
+    "assetBase": "sample-assets"
   },
   "homeAssistant": {
     "enabled": true,
