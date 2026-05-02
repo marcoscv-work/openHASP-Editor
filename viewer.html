@@ -211,6 +211,17 @@
       border-color: var(--accent);
     }
 
+    button.danger {
+      background: #3a1f24;
+      border-color: #8b3a45;
+      color: #ffd8dc;
+    }
+
+    button.danger:hover {
+      border-color: #ff6b7b;
+      background: #4a252c;
+    }
+
     .tabs {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
@@ -722,7 +733,7 @@
           <button id="pageUndoBtn">Undo</button>
           <button id="pageRedoBtn">Redo</button>
           <button id="pageDownloadBtn">Download JSONL</button>
-          <button id="deletePageBtn">Delete Page</button>
+          <button id="deletePageBtn" class="danger">Delete Page</button>
           <button id="selectFirstBtn">Select First</button>
         </div>
       </div>
@@ -771,7 +782,7 @@
           <button id="undoBtn">Undo</button>
           <button id="redoBtn">Redo</button>
           <button id="downloadBtn">Download JSONL</button>
-          <button id="deleteElementBtn">Delete Element</button>
+          <button id="deleteElementBtn" class="danger">Delete Element</button>
           <button id="clearSelectionBtn">Page Editor</button>
         </div>
       </div>
@@ -1432,6 +1443,9 @@
 
     function deleteCurrentPage() {
       if (!state.pages.has(state.currentPage)) return;
+      const items = state.pages.get(state.currentPage) || [];
+      const message = `Delete Page ${state.currentPage} and its ${items.length} objects? This can be undone with Ctrl+Z.`;
+      if (!window.confirm(message)) return;
       pushUndoState();
       const oldPage = state.currentPage;
       state.pages.delete(oldPage);
@@ -1449,6 +1463,11 @@
       renderTabs();
       render();
       updateEditor();
+    }
+
+    function isTypingTarget(target) {
+      const tag = target?.tagName?.toLowerCase();
+      return tag === "input" || tag === "textarea" || tag === "select" || target?.isContentEditable;
     }
 
     function centeredRect(width = 120, height = 50) {
@@ -2159,6 +2178,11 @@
       if (first) selectItem(first);
     });
     window.addEventListener("keydown", event => {
+      if ((event.key === "Delete" || event.key === "Backspace") && !isTypingTarget(event.target) && selectedPageItems().length) {
+        event.preventDefault();
+        deleteSelectedElement();
+        return;
+      }
       const mod = event.ctrlKey || event.metaKey;
       if (event.key === "Escape") {
         event.preventDefault();
