@@ -169,12 +169,24 @@
       gap: 8px;
     }
 
+    #pageFields,
+    #editorFields {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #pageFields[hidden],
+    #editorFields[hidden] {
+      display: none;
+    }
+
     .page-transfer {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto auto;
       gap: 8px;
       align-items: end;
-      margin-top: 4px;
+      margin-top: 2px;
       margin-bottom: 2px;
     }
 
@@ -522,6 +534,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
+      margin-top: 2px;
     }
 
     .editor-actions button {
