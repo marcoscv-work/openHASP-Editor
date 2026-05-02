@@ -218,7 +218,7 @@
     }
 
     .stage-wrap {
-      width: min(100%, calc(var(--screen-width) + 48px));
+      width: min(100%, calc((var(--screen-width) + 48px) * var(--zoom, 1)));
       display: grid;
       justify-items: center;
       gap: 14px;
@@ -227,8 +227,7 @@
     .phone {
       width: calc((var(--screen-width) + 28px) * var(--zoom, 1));
       height: calc((var(--screen-height) + 28px) * var(--zoom, 1));
-      display: grid;
-      place-items: center;
+      padding: calc(14px * var(--zoom, 1));
       border-radius: calc(28px * var(--zoom, 1));
       background: #050607;
       box-shadow: 0 24px 90px rgba(0, 0, 0, 0.46), inset 0 0 0 1px #2c333b;
@@ -242,7 +241,7 @@
       border-radius: calc(13px * var(--zoom, 1));
       background: #0b0d10;
       transform: scale(var(--zoom, 1));
-      transform-origin: center;
+      transform-origin: top left;
     }
 
     .lv {
@@ -270,6 +269,13 @@
       outline-offset: 2px;
       box-shadow: 0 0 0 4px rgba(240, 194, 75, 0.18);
       z-index: 40;
+    }
+
+    .lv.multi-selected {
+      outline: 2px solid #4ec3a3;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(78, 195, 163, 0.16);
+      z-index: 39;
     }
 
     .resize-box {
@@ -696,6 +702,18 @@
       <div id="editorFields" hidden>
         <div class="stats" id="selectionSummary"></div>
 
+        <div class="row">
+          <label>
+            Target Page
+            <select id="targetPageSelect"></select>
+          </label>
+          <button id="copyToPageBtn">Copy</button>
+        </div>
+
+        <div class="editor-actions">
+          <button id="moveToPageBtn">Move to Page</button>
+        </div>
+
         <div class="quad">
           <label>
             X
@@ -745,6 +763,7 @@
       parseErrors: [],
       sourceLines: 0,
       selectedUid: null,
+      selectedUids: [],
       uidCounter: 1,
       undoStack: [],
       redoStack: []
@@ -785,6 +804,9 @@
       selectFirstBtn: document.querySelector("#selectFirstBtn"),
       editorFields: document.querySelector("#editorFields"),
       selectionSummary: document.querySelector("#selectionSummary"),
+      targetPageSelect: document.querySelector("#targetPageSelect"),
+      copyToPageBtn: document.querySelector("#copyToPageBtn"),
+      moveToPageBtn: document.querySelector("#moveToPageBtn"),
       editX: document.querySelector("#editX"),
       editY: document.querySelector("#editY"),
       editW: document.querySelector("#editW"),
@@ -885,6 +907,7 @@
       state.sourceLines = result.sourceLines;
       state.filename = filename;
       state.selectedUid = null;
+      state.selectedUids = [];
       state.undoStack = [];
       state.redoStack = [];
 
@@ -904,6 +927,7 @@
         button.addEventListener("click", () => {
           state.currentPage = page;
           state.selectedUid = null;
+          state.selectedUids = [];
           renderTabs();
           render();
           updateEditor();
@@ -1013,6 +1037,23 @@
       return allItems().find(item => item.__uid === state.selectedUid) || null;
     }
 
+    function selectedItems() {
+      const selected = new Set(state.selectedUids);
+      return allItems().filter(item => selected.has(item.__uid));
+    }
+
+    function hasSelectedItem(item) {
+      return state.selectedUids.includes(item.__uid);
+    }
+
+    function normalizeSelection() {
+      const existing = new Set(allItems().map(item => item.__uid));
+      state.selectedUids = state.selectedUids.filter(uid => existing.has(uid));
+      if (!state.selectedUids.includes(state.selectedUid)) {
+        state.selectedUid = state.selectedUids[0] ?? null;
+      }
+    }
+
     function itemBox(item) {
       const size = screenSize();
       return {
@@ -1036,6 +1077,7 @@
         pageSettings: [...state.pageSettings.entries()].map(([page, settings]) => [page, { ...settings }]),
         globals: state.globals.map(item => ({ ...item })),
         selectedUid: state.selectedUid,
+        selectedUids: [...state.selectedUids],
         uidCounter: state.uidCounter,
         currentPage: state.currentPage
       };
@@ -1046,6 +1088,8 @@
       state.pageSettings = new Map((snapshot.pageSettings || []).map(([page, settings]) => [page, { ...settings }]));
       state.globals = snapshot.globals.map(item => ({ ...item }));
       state.selectedUid = snapshot.selectedUid;
+      state.selectedUids = [...(snapshot.selectedUids || (snapshot.selectedUid ? [snapshot.selectedUid] : []))];
+      normalizeSelection();
       state.uidCounter = snapshot.uidCounter;
       state.currentPage = snapshot.currentPage;
       renderTabs();
@@ -1180,8 +1224,20 @@
       });
     }
 
-    function selectItem(item, shouldRender = true) {
-      state.selectedUid = item?.__uid ?? null;
+    function selectItem(item, shouldRender = true, additive = false) {
+      if (!item) {
+        state.selectedUid = null;
+        state.selectedUids = [];
+      } else if (additive) {
+        const exists = state.selectedUids.includes(item.__uid);
+        state.selectedUids = exists
+          ? state.selectedUids.filter(uid => uid !== item.__uid)
+          : [...state.selectedUids, item.__uid];
+        state.selectedUid = exists ? state.selectedUids[0] ?? null : item.__uid;
+      } else {
+        state.selectedUid = item.__uid;
+        state.selectedUids = [item.__uid];
+      }
       updateEditor();
       if (shouldRender) render();
     }
@@ -1194,6 +1250,7 @@
       const item = selectedItem();
       els.editorError.textContent = "";
       els.pageError.textContent = "";
+      normalizeSelection();
       if (!item) {
         els.editorTitle.textContent = "Page Editor";
         els.editorSubtitle.textContent = "Configure the current page, background, and page-level JSON. Select an object to edit element properties.";
@@ -1211,11 +1268,14 @@
       els.editorFields.hidden = false;
       const page = item.__page ?? state.currentPage;
       const address = objectAddress(item, page);
+      const selectedCount = selectedItems().length;
       els.selectionSummary.innerHTML = `
         <div><strong>${escapeHtml(address)}</strong></div>
         <div>Type: ${escapeHtml(item.obj)} · ID: ${escapeHtml(item.id)}</div>
         <div>Page: ${escapeHtml(page)} · ${isTouchDisabled(item) ? "Touch disabled" : "Touch enabled or default"}</div>
+        <div>${selectedCount > 1 ? `${selectedCount} elements selected` : "1 element selected"}</div>
       `;
+      updateTargetPageOptions();
       els.editX.value = valueOr(item, "x", 0);
       els.editY.value = valueOr(item, "y", 0);
       els.editW.value = valueOr(item, "w", "");
@@ -1236,6 +1296,22 @@
       els.pageBgImage.value = bgImage?.src || "";
       els.pageClick.value = valueOr(settings, "click", "");
       els.pageJsonEditor.value = JSON.stringify(cleanPageSettings(settings), null, 2);
+    }
+
+    function updateTargetPageOptions() {
+      const pages = [...state.pages.keys()].sort((a, b) => a - b);
+      const currentValue = Number(els.targetPageSelect.value);
+      const preferred = pages.includes(currentValue)
+        ? currentValue
+        : pages.find(page => page !== state.currentPage) ?? state.currentPage;
+      els.targetPageSelect.innerHTML = "";
+      pages.forEach(page => {
+        const option = document.createElement("option");
+        option.value = page;
+        option.textContent = `Page ${page}`;
+        els.targetPageSelect.append(option);
+      });
+      els.targetPageSelect.value = preferred;
     }
 
     function applyPageJson() {
@@ -1323,6 +1399,7 @@
       });
       state.currentPage = page;
       state.selectedUid = null;
+      state.selectedUids = [];
       renderTabs();
       render();
       updateEditor();
@@ -1335,6 +1412,7 @@
       state.pages.delete(oldPage);
       state.pageSettings.delete(oldPage);
       state.selectedUid = null;
+      state.selectedUids = [];
       const remaining = [...state.pages.keys()].sort((a, b) => a - b);
       if (!remaining.length) {
         state.pages.set(1, []);
@@ -1406,19 +1484,81 @@
       selectItem(item);
     }
 
-    function deleteSelectedElement() {
-      const item = selectedItem();
-      if (!item) return;
-      pushUndoState();
-      const uid = item.__uid;
-      if (item.__page === 0) {
-        state.globals = state.globals.filter(candidate => candidate.__uid !== uid);
-      } else {
-        const page = item.__page ?? state.currentPage;
-        const items = state.pages.get(page) || [];
-        state.pages.set(page, items.filter(candidate => candidate.__uid !== uid));
+    function selectedPageItems() {
+      const selected = new Set(state.selectedUids);
+      return (state.pages.get(state.currentPage) || []).filter(item => selected.has(item.__uid));
+    }
+
+    function targetPageNumber() {
+      return Number(els.targetPageSelect.value) || state.currentPage;
+    }
+
+    function cloneItemForPage(item, targetPage, targetItems, preserveId = false) {
+      const clone = cleanItem(item);
+      const usedIds = new Set(targetItems.map(candidate => Number(candidate.id)).filter(Number.isFinite));
+      if (!preserveId || usedIds.has(Number(clone.id))) {
+        clone.id = nextAvailableId(targetItems);
       }
+      return {
+        ...clone,
+        __page: targetPage,
+        __uid: state.uidCounter++
+      };
+    }
+
+    function copySelectionToPage() {
+      const items = selectedPageItems();
+      const targetPage = targetPageNumber();
+      if (!items.length || !state.pages.has(targetPage)) return;
+      pushUndoState();
+      const targetItems = state.pages.get(targetPage) || [];
+      const clones = items.map(item => {
+        const clone = cloneItemForPage(item, targetPage, targetItems);
+        targetItems.push(clone);
+        return clone;
+      });
+      state.pages.set(targetPage, targetItems);
+      state.currentPage = targetPage;
+      state.selectedUids = clones.map(item => item.__uid);
+      state.selectedUid = state.selectedUids[0] ?? null;
+      renderTabs();
+      render();
+      updateEditor();
+    }
+
+    function moveSelectionToPage() {
+      const items = selectedPageItems();
+      const targetPage = targetPageNumber();
+      if (!items.length || !state.pages.has(targetPage)) return;
+      if (targetPage === state.currentPage) return;
+      pushUndoState();
+      const selected = new Set(items.map(item => item.__uid));
+      const sourceItems = state.pages.get(state.currentPage) || [];
+      const targetItems = state.pages.get(targetPage) || [];
+      const moved = items.map(item => {
+        const clone = cloneItemForPage(item, targetPage, targetItems, true);
+        targetItems.push(clone);
+        return clone;
+      });
+      state.pages.set(state.currentPage, sourceItems.filter(item => !selected.has(item.__uid)));
+      state.pages.set(targetPage, targetItems);
+      state.currentPage = targetPage;
+      state.selectedUids = moved.map(item => item.__uid);
+      state.selectedUid = state.selectedUids[0] ?? null;
+      renderTabs();
+      render();
+      updateEditor();
+    }
+
+    function deleteSelectedElement() {
+      const items = selectedPageItems();
+      if (!items.length) return;
+      pushUndoState();
+      const selected = new Set(items.map(item => item.__uid));
+      const pageItems = state.pages.get(state.currentPage) || [];
+      state.pages.set(state.currentPage, pageItems.filter(candidate => !selected.has(candidate.__uid)));
       state.selectedUid = null;
+      state.selectedUids = [];
       render();
       updateEditor();
     }
@@ -1583,13 +1723,16 @@
       if (!isInspectable(item)) return;
       el.addEventListener("click", event => {
         event.stopPropagation();
-        selectItem(item);
+        selectItem(item, true, event.shiftKey);
       });
 
       let drag = null;
       el.addEventListener("pointerdown", event => {
         if (event.button !== 0) return;
         event.stopPropagation();
+        if (event.shiftKey) {
+          return;
+        }
         selectItem(item, false);
         el.classList.add("selected");
         const zoom = Number(els.zoom.value) || 1;
@@ -1748,6 +1891,7 @@
       el.dataset.uid = item.__uid ?? "";
       el.title = `id ${item.id ?? "-"} · ${item.obj}`;
       if (item.__uid === state.selectedUid) el.classList.add("selected");
+      else if (hasSelectedItem(item)) el.classList.add("multi-selected");
 
       const x = valueOr(item, "x", 0);
       const y = valueOr(item, "y", 0);
@@ -1886,7 +2030,7 @@
 
     function renderResizeBox() {
       const item = selectedItem();
-      if (!item) return;
+      if (!item || state.selectedUids.length !== 1) return;
       const box = itemBox(item);
       const overlay = document.createElement("div");
       overlay.className = "resize-box";
@@ -1974,6 +2118,8 @@
     els.redoBtn.addEventListener("click", redo);
     els.downloadBtn.addEventListener("click", downloadJsonl);
     els.deleteElementBtn.addEventListener("click", deleteSelectedElement);
+    els.copyToPageBtn.addEventListener("click", copySelectionToPage);
+    els.moveToPageBtn.addEventListener("click", moveSelectionToPage);
     els.clearSelectionBtn.addEventListener("click", clearSelection);
     els.backToPageBtn.addEventListener("click", clearSelection);
     els.applyPageJsonBtn.addEventListener("click", applyPageJson);
