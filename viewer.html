@@ -1312,11 +1312,23 @@
         <div>${selectedCount > 1 ? `${selectedCount} elements selected` : "1 element selected"}</div>
       `;
       updateTargetPageOptions();
-      els.editX.value = valueOr(item, "x", 0);
-      els.editY.value = valueOr(item, "y", 0);
-      els.editW.value = valueOr(item, "w", "");
-      els.editH.value = valueOr(item, "h", "");
-      els.jsonEditor.value = JSON.stringify(cleanItem(item), null, 2);
+      const isMultiSelection = selectedCount > 1;
+      [els.editX, els.editY, els.editW, els.editH, els.jsonEditor, els.applyJsonBtn].forEach(control => {
+        control.disabled = isMultiSelection;
+      });
+      if (isMultiSelection) {
+        els.editX.value = "";
+        els.editY.value = "";
+        els.editW.value = "";
+        els.editH.value = "";
+        els.jsonEditor.value = `${selectedCount} elements selected.\n\nRaw JSON editing is disabled during multiselection. Select a single element to edit its JSON.`;
+      } else {
+        els.editX.value = valueOr(item, "x", 0);
+        els.editY.value = valueOr(item, "y", 0);
+        els.editW.value = valueOr(item, "w", "");
+        els.editH.value = valueOr(item, "h", "");
+        els.jsonEditor.value = JSON.stringify(cleanItem(item), null, 2);
+      }
     }
 
     function updatePageEditor() {
@@ -1709,7 +1721,7 @@
 
     function setSelectedNumeric(key, value) {
       const item = selectedItem();
-      if (!item) return;
+      if (!item || state.selectedUids.length > 1) return;
       pushUndoState();
       const numeric = Number(value);
       if (Number.isNaN(numeric)) {
@@ -1723,7 +1735,7 @@
 
     function applyJsonEditor() {
       const item = selectedItem();
-      if (!item) return;
+      if (!item || state.selectedUids.length > 1) return;
       try {
         const parsed = JSON.parse(els.jsonEditor.value);
         if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Element JSON must be an object.");
