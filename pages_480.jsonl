@@ -1,0 +1,165 @@
+
+
+{"page":1,"comment":"---------- Page 1 ----------","click":0}
+
+// Fila 1
+{"id":1,"obj":"btn","x":20,"y":20,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":50,"obj":"label","x":20,"y":90,"w":133,"h":20,"text":"TV Ambilight","text_font":16,"align":1,"click":0}
+
+{"id":2,"obj":"btn","x":174,"y":20,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":51,"obj":"label","x":174,"y":90,"w":133,"h":20,"text":"Lámpara V","text_font":16,"align":1,"click":0}
+
+{"id":3,"obj":"btn","x":328,"y":20,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":52,"obj":"label","x":328,"y":90,"w":133,"h":20,"text":"Lámpara M","text_font":16,"align":1,"click":0}
+
+// Fila 2
+{"id":4,"obj":"btn","x":20,"y":125,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":53,"obj":"label","x":20,"y":196,"w":133,"h":20,"text":"LED Cabecero","text_font":16,"align":1,"click":0}
+
+{"id":5,"obj":"btn","x":174,"y":125,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":54,"obj":"label","x":174,"y":196,"w":133,"h":20,"text":"Terraza","text_font":16,"align":1,"click":0}
+
+{"id":6,"obj":"btn","x":328,"y":125,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":55,"obj":"label","x":328,"y":196,"w":133,"h":20,"text":"Dormitorio","text_font":16,"align":1,"click":0}
+
+// Fila 3
+{"id":7,"obj":"btn","x":20,"y":230,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":56,"obj":"label","x":20,"y":300,"w":133,"h":20,"text":"LED Cabecero","text_font":16,"align":1,"click":0}
+
+{"id":8,"obj":"btn","x":174,"y":230,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":57,"obj":"label","x":174,"y":300,"w":133,"h":20,"text":"Terraza","text_font":16,"align":1,"click":0}
+
+{"id":9,"obj":"btn","x":328,"y":230,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":58,"obj":"label","x":328,"y":300,"w":133,"h":20,"text":"Cocina","text_font":16,"align":1,"click":0}
+
+// Fila 4
+{"id":10,"obj":"btn","x":20,"y":335,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":59,"obj":"label","x":20,"y":404,"w":133,"h":20,"text":"Lámpara Cocina","text_font":16,"align":1,"click":0}
+
+{"id":11,"obj":"btn","x":174,"y":335,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":60,"obj":"label","x":174,"y":404,"w":133,"h":20,"text":"Estudio","text_font":16,"align":1,"click":0}
+
+{"id":12,"obj":"btn","x":328,"y":335,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":61,"obj":"label","x":328,"y":404,"w":133,"h":20,"text":"Central Salon","text_font":16,"align":1,"click":0}
+
+
+{"page":2,"comment":"---------- Page 2 ----------","click":0}
+
+// Color Picker 1
+{"id":60,"obj":"label","x":30,"y":18,"w":220,"h":20,"text":"TV Ambilight","text_font":20,"align":0} // Titul,"click":0o
+{"id":1,"obj":"cpicker","x":50,"y":50,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":2,"obj":"slider","x":50,"y":110,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+// Color Picker 2
+{"id":61,"obj":"label","x":30,"y":158,"w":220,"h":20,"text":"LED Salón","text_font":20,"align":0} // Titul,"click":0o
+{"id":3,"obj":"cpicker","x":50,"y":190,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":4,"obj":"slider","x":50,"y":250,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+// Color Picker 3
+{"id":62,"obj":"label","x":30,"y":298,"w":220,"h":20,"text":"LED Cabecero","text_font":20,"align":0} // Titul,"click":0o
+{"id":5,"obj":"cpicker","x":50,"y":330,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":6,"obj":"slider","x":50,"y":390,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+
+
+{"page":3,"comment":"---------- Page 3 ----------","click":0}
+//Persiana 1
+{"id":50,"obj":"label","x":20,"y":12,"w":133,"h":20,"text":"Salón Izquierda","text_font":20,"align":1} // Títul,"click":0o
+{"id":60,"obj":"obj","x":20,"y":37,"w":133,"h":180,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0}
+{"id":1,"obj":"btn","x":95,"y":47,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":2,"obj":"slider","x":35,"y":62,"w":35,"h":130,"min":0,"max":100} // Slider
+{"id":3,"obj":"btn","x":95,"y":162,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":20,"obj":"label","x":75,"y":112,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estad,"click":0o
+
+//Persiana 2:
+{"id":51,"obj":"label","x":175,"y":12,"w":133,"h":20,"text":"Salón Central","text_font":20,"align":1} // Titul,"click":0o
+{"id":61,"obj":"obj","x":175,"y":37,"w":133,"h":180,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0}
+{"id":4,"obj":"btn","x":250,"y":47,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":5,"obj":"slider","x":190,"y":62,"w":35,"h":130,"min":0,"max":100} // Slider
+{"id":6,"obj":"btn","x":250,"y":162,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":21,"obj":"label","x":230,"y":112,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estad,"click":0o
+
+//Persiana 3:
+{"id":52,"obj":"label","x":330,"y":12,"w":133,"h":20,"text":"Salón Derecha","text_font":20,"align":1} // Titul,"click":0o
+{"id":62,"obj":"obj","x":330,"y":37,"w":133,"h":180,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0}
+{"id":7,"obj":"btn","x":405,"y":47,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":8,"obj":"slider","x":345,"y":62,"w":35,"h":130,"min":0,"max":100} // Slider
+{"id":9,"obj":"btn","x":405,"y":162,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":22,"obj":"label","x":385,"y":112,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estad,"click":0o
+
+//Persiana 4:
+{"id":53,"obj":"label","x":20,"y":227,"w":133,"h":20,"text":"Puerta Terraza","text_font":20,"align":1} // Titul,"click":0o
+{"id":63,"obj":"obj","x":20,"y":252,"w":133,"h":180,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0}
+{"id":10,"obj":"btn","x":95,"y":262,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":11,"obj":"slider","x":35,"y":277,"w":35,"h":130,"min":0,"max":100} // Slider
+{"id":12,"obj":"btn","x":95,"y":377,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":23,"obj":"label","x":75,"y":327,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estad,"click":0o
+
+//Persiana 5:
+{"id":54,"obj":"label","x":175,"y":227,"w":133,"h":20,"text":"Dormitorio","text_font":20,"align":1} // Titul,"click":0o
+{"id":64,"obj":"obj","x":175,"y":252,"w":133,"h":180,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0}
+{"id":13,"obj":"btn","x":250,"y":262,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":14,"obj":"slider","x":190,"y":277,"w":35,"h":130,"min":0,"max":100} // Slider
+{"id":15,"obj":"btn","x":250,"y":377,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":24,"obj":"label","x":230,"y":327,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estad,"click":0o
+
+// Fila Botones
+
+// Fila 1
+{"id":36,"obj":"label","x":328,"y":227,"w":133,"h":20,"text":"Abrir Persianas","text_font":20,"align":1,"click":0}
+{"id":37,"obj":"btn","x":328,"y":252,"w":133,"h":70,"toggle":false,"text":"\uF11E","text_font":50,"align":1,"bg_color":"black","bg_grad_dir":0}
+
+{"id":38,"obj":"label","x":328,"y":337,"w":133,"h":20,"text":"Cerrar Persianas","text_font":20,"align":1,"click":0}
+{"id":39,"obj":"btn","x":328,"y":362,"w":133,"h":70,"toggle":false,"text":"\uF11C","text_font":50,"align":1,"bg_color":"black","bg_grad_dir":0}
+
+
+
+
+
+{"page":4,"comment":"---------- Page 4 ----------","click":0}
+
+{"id":95,"obj":"img","src":"L:/bg_01.png","auto_size":0,"w":480,"h":480,"click":0}
+
+// Fila 1
+// {"id":1,"obj":"btn","x":20,"y":320,"w":133,"h":70,"toggle":true,"text":"\uE335         ","text_font":40}
+// {"id":10,"obj":"label","x":20,"y":332,"w":120,"h":40,"text":"Ambilight\nTV","text_font":16,"align":2,"click":0,"mode":"break"}
+
+// {"id":2,"obj":"btn","x":174,"y":320,"w":133,"h":70,"toggle":true,"text":"\uE335         ","text_font":40}
+// {"id":11,"obj":"label","x":174,"y":340,"w":120,"h":20,"text":"Lámpara V","text_font":16,"align":2,"click":0}
+
+// {"id":3,"obj":"btn","x":328,"y":320,"w":133,"h":70,"toggle":true,"text":"\uE335         ","text_font":40}
+// {"id":12,"obj":"label","x":328,"y":340,"w":120,"h":20,"text":"Lámpara M","text_font":16,"align":2,"click":0}
+
+
+{"id":16,"obj":"label","x":200,"y":65,"w":120,"h":20,"text":"Temperatura:","text_font":20,"align":2,"click":0}
+{"id":20,"obj":"label","x":330,"y":50,"w":150,"h":60,"text":"00°","text_font":46,"align":0,"click":0}
+
+{"id":15,"obj":"label","x":200,"y":125,"w":120,"h":30,"text":"Humedad:","text_font":20,"align":2,"click":0}
+{"id":19,"obj":"label","x":330,"y":110,"w":150,"h":60,"text":"00%","text_font":46,"align":0,"click":0}
+
+{"id":21,"obj":"label","x":40,"y":40,"w":300,"h":200,"text":"\uE595","text_font":126,"align":0,"click":0}
+
+// Fila 2
+{"id":55,"obj":"label","x":175,"y":210,"w":133,"h":30,"text":"Ambientes","text_font":24,"align":1,"click":0} // Titulo
+
+{"id":1,"obj":"btn","x":20,"y":245,"w":133,"h":70,"toggle":false,"text":"\uE5A8","text_font":50,"align":1,"bg_color":"Maroon", "bg_grad_color":"Tomato"}
+{"id":41,"obj":"label","x":20,"y":320,"w":133,"h":20,"text":"Buenos Días","text_font":16,"align":1}
+
+{"id":2,"obj":"btn","x":174,"y":245,"w":133,"h":70,"toggle":false,"text":"\uE4B9","text_font":50,"align":1}
+{"id":43,"obj":"label","x":174,"y":320,"w":133,"h":20,"text":"Modo Cine","text_font":16,"align":1}
+
+{"id":3,"obj":"btn","x":328,"y":245,"w":133,"h":70,"toggle":false,"text":"\uE594","text_font":50,"align":1,"bg_color":"Navy"}
+{"id":45,"obj":"label","x":328,"y":320,"w":133,"h":20,"text":"Buenas Noches","text_font":16,"align":1}
+
+
+
+{"comment":"---------- All Pages ----------"}
+
+{"page":0,"id":7,"obj":"btn","action":"prev","x":0,"y":440,"w":159,"h":40,"text":"\uE141","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
+{"page":0,"id":8,"obj":"btn","action":"back","x":160,"y":440,"w":159,"h":40,"text":"\uE2DC","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":24}
+{"page":0,"id":9,"obj":"btn","action":"next","x":320,"y":440,"w":159,"h":40,"text":"\uE142","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
+//{"page":0,"id":10,"obj":"obj","swipe":1,"x":0,"y":0,"h":480,"w":480,"opacity":0}
+
+// Tapa Negra
+//{"page":0,"id":99,"obj":"obj","x":-2,"y":-2,"w":484,"h":804,"radius":0,"hidden":1,"bg_grad_dir":0,"bg_color":"black","bg_grad_dir":0}
+
+{"comment":"---------- Limit page prev/next between X and X ----------"}
+{"page":1,"id":0,"prev":4}
+{"page":4,"id":0,"next":1}

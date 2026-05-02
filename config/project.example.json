@@ -1,0 +1,27 @@
+{
+  "device": {
+    "name": "pantalla",
+    "mqttBaseTopic": "hasp",
+    "resolution": {
+      "preset": "480x480",
+      "width": 480,
+      "height": 480
+    }
+  },
+  "viewer": {
+    "pagesFile": "pages_480_vero.jsonl",
+    "assetBase": "Imagenes OpenHASP Vero"
+  },
+  "homeAssistant": {
+    "enabled": true,
+    "automationDirectory": "automations",
+    "automationFiles": {
+      "states": "openhasp_estados.yaml",
+      "scenes": "openhasp_ambientes.yaml",
+      "backlight": "openhasp_backlight_antiburn.yaml",
+      "covers": "openhasp_persianas.yaml",
+      "lights": "openhasp_luces_leds.yaml"
+    }
+  },
+  "bindingsFile": "bindings.openhasp.example.json"
+}

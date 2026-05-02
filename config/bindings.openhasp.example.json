@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "device": "pantalla",
+  "bindings": {
+    "p1b1": {
+      "role": "light_toggle",
+      "entity": "light.recibidor",
+      "automation": "lights"
+    },
+    "p1b5": {
+      "role": "light_rgb_color",
+      "entity": "light.led_cocina",
+      "automation": "lights",
+      "related": {
+        "brightness": "p1b6",
+        "toggle": "p1b3"
+      }
+    },
+    "p2b2": {
+      "role": "cover_position",
+      "entity": "cover.persiana_salon_1",
+      "automation": "covers",
+      "related": {
+        "open": "p2b1",
+        "close": "p2b3",
+        "stateText": "p2b80"
+      }
+    },
+    "p4b10": {
+      "role": "scene_confirm",
+      "name": "Buenas Noches",
+      "automation": "scenes",
+      "confirmationObject": "p0b200"
+    }
+  }
+}

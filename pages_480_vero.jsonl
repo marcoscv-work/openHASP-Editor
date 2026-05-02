@@ -1,0 +1,201 @@
+{"page":1,"comment":"---------- Page 1 ----------","click":0}
+
+{"id":95,"obj":"img","src":"L:/04.png","auto_size":0,"w":480,"h":480,"click":0}
+{"id":99,"obj":"btn","x":160,"y":420,"w":159,"h":60,"text":"Recibidor\nCocina","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":20,"click":0,"align":1}
+
+// Fila 1
+{"id":1,"obj":"btn","x":20,"y":20,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":50,"obj":"label","x":20,"y":120,"w":133,"h":20,"text":"Recibidor","text_font":20,"align":1,"click":0}
+
+// Tiempo
+{"id":80,"obj":"label","x":330,"y":30,"w":150,"h":60,"text":"00°","text_font":46,"align":0,"click":0}
+{"id":81,"obj":"label","x":330,"y":90,"w":150,"h":60,"text":"00%","text_font":36,"align":0,"click":0}
+// Icono Tiempo
+{"id":51,"obj":"label","x":180,"y":5,"w":300,"h":200,"text":"\uE595","text_font":126,"align":0,"click":0}
+
+// Fila 3
+{"id":2,"obj":"btn","x":20,"y":170,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":52,"obj":"label","x":20,"y":240,"w":133,"h":20,"text":"Cocina","text_font":20,"align":1,"click":0}
+
+{"id":3,"obj":"btn","x":174,"y":170,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":53,"obj":"label","x":174,"y":240,"w":133,"h":20,"text":"LED Cocina","text_font":20,"align":1,"click":0}
+
+{"id":4,"obj":"btn","x":328,"y":170,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":54,"obj":"label","x":328,"y":240,"w":133,"h":20,"text":"Tendedero","text_font":20,"align":1,"click":0}
+
+// Color Picker Cocina
+{"id":5,"obj":"cpicker","x":50,"y":300,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":6,"obj":"slider","x":50,"y":360,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+
+
+{"page":2,"comment":"---------- Page 2 ----------","click":0} // Salón
+
+{"id":95,"obj":"img","src":"L:/03.png","auto_size":0,"w":480,"h":480,"click":0}
+{"id":99,"obj":"btn","x":160,"y":420,"w":159,"h":60,"text":"Salón\nPasillo","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":20,"click":0,"align":1}
+
+//Persiana 1:
+{"id":50,"obj":"label","x":20,"y":10,"w":133,"h":20,"text":"Salón Izquierda","text_font":20,"align":1} // Titulo
+{"id":51,"obj":"obj","x":20,"y":35,"w":133,"h":210,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0,"bg_opa":100}
+{"id":1,"obj":"btn","x":95,"y":50,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":2,"obj":"slider","x":35,"y":59,"w":35,"h":160,"min":0,"max":100} // Slider
+{"id":3,"obj":"btn","x":95,"y":185,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":80,"obj":"label","x":75,"y":125,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estado
+
+//Persiana 2:
+{"id":53,"obj":"label","x":175,"y":10,"w":133,"h":20,"text":"Salón Central","text_font":20,"align":1} // Titulo
+{"id":54,"obj":"obj","x":175,"y":35,"w":133,"h":210,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0,"bg_opa":100}
+{"id":4,"obj":"btn","x":250,"y":50,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":5,"obj":"slider","x":190,"y":59,"w":35,"h":160,"min":0,"max":100} // Slider
+{"id":6,"obj":"btn","x":250,"y":185,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":81,"obj":"label","x":230,"y":125,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estado
+
+//Persiana 3:
+{"id":56,"obj":"label","x":330,"y":10,"w":133,"h":20,"text":"Salón Derecha","text_font":20,"align":1} // Titulo
+{"id":57,"obj":"obj","x":330,"y":35,"w":133,"h":210,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0,"bg_opa":100}
+{"id":7,"obj":"btn","x":405,"y":50,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":8,"obj":"slider","x":345,"y":59,"w":35,"h":160,"min":0,"max":100} // Slider
+{"id":9,"obj":"btn","x":405,"y":185,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":82,"obj":"label","x":385,"y":125,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estado
+
+// Fila 3
+{"id":10,"obj":"btn","x":20,"y":260,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":58,"obj":"label","x":20,"y":360,"w":133,"h":20,"text":"Lámpara","text_font":20,"align":1,"click":0}
+
+{"id":11,"obj":"btn","x":174,"y":260,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":59,"obj":"label","x":174,"y":360,"w":133,"h":20,"text":"Focos","text_font":20,"align":1,"click":0}
+
+{"id":12,"obj":"btn","x":328,"y":260,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":60,"obj":"label","x":328,"y":360,"w":133,"h":20,"text":"Pasillo","text_font":20,"align":1,"click":0}
+
+{"page":3,"comment":"---------- Page 3 ----------","click":0} // Leds Pasillo Salón
+
+{"id":95,"obj":"img","src":"L:/03.png","auto_size":0,"w":480,"h":480,"click":0}
+{"id":99,"obj":"btn","x":160,"y":420,"w":159,"h":60,"text":"Salón\nPasillo","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":20,"click":0,"align":1}
+
+// Color Picker 1
+{"id":50,"obj":"label","x":30,"y":18,"w":220,"h":20,"text":"LED Salón","text_font":20,"align":0} // Titul,"click":0o
+{"id":1,"obj":"cpicker","x":50,"y":50,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":2,"obj":"slider","x":50,"y":110,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+// Color Picker 2
+{"id":51,"obj":"label","x":30,"y":158,"w":220,"h":20,"text":"LED Pasillo","text_font":20,"align":0} // Titul,"click":0o
+{"id":3,"obj":"cpicker","x":50,"y":190,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":4,"obj":"slider","x":50,"y":250,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+
+// Fila 4
+{"id":5,"obj":"btn","x":90,"y":310,"w":133,"h":60,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":52,"obj":"label","x":90,"y":369,"w":133,"h":20,"text":"LED Salón","text_font":20,"align":1,"click":0}
+
+{"id":6,"obj":"btn","x":250,"y":310,"w":133,"h":60,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":53,"obj":"label","x":250,"y":369,"w":133,"h":20,"text":"LED Pasillo","text_font":20,"align":1,"click":0}
+
+
+{"page":4,"comment":"---------- Page 4 ----------","click":0} // Dormitorio
+
+{"id":95,"obj":"img","src":"L:/05.png","auto_size":0,"w":480,"h":480,"click":0}
+{"id":99,"obj":"btn","x":160,"y":420,"w":159,"h":60,"text":"Dormitorio","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":24,"click":0,"align":1}
+
+//Persiana Dormitorio
+{"id":50,"obj":"obj","x":20,"y":20,"w":133,"h":210,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0,"bg_opa":100}
+{"id":1,"obj":"btn","x":95,"y":35,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":2,"obj":"slider","x":35,"y":44,"w":35,"h":160,"min":0,"max":100} // Slider
+{"id":3,"obj":"btn","x":95,"y":170,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":80,"obj":"label","x":75,"y":110,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estado
+
+{"id":4,"obj":"btn","x":174,"y":20,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":51,"obj":"label","x":174,"y":90,"w":133,"h":20,"text":"Luz Focos","text_font":20,"align":1,"click":0}
+
+{"id":5,"obj":"btn","x":328,"y":20,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":52,"obj":"label","x":328,"y":90,"w":133,"h":20,"text":"Luz Lámpara","text_font":20,"align":1,"click":0}
+
+{"id":6,"obj":"btn","x":174,"y":125,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":53,"obj":"label","x":174,"y":196,"w":133,"h":20,"text":"\uE95F Derecha","text_font":20,"align":1,"click":0}
+
+{"id":7,"obj":"btn","x":328,"y":125,"w":133,"h":70,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":54,"obj":"label","x":328,"y":196,"w":133,"h":20,"text":"\uE95F Izquierda","text_font":20,"align":1,"click":0}
+
+// Fila 4
+
+{"id":8,"obj":"btn","x":20,"y":280,"w":133,"h":70,"toggle":false,"text":"\uE5A8","text_font":50,"align":1,"bg_color":"Maroon", "bg_grad_color":"Tomato"}
+{"id":55,"obj":"label","x":20,"y":350,"w":133,"h":20,"text":"Buenos Días","text_font":20,"align":1}
+
+{"id":9,"obj":"btn","x":174,"y":280,"w":133,"h":70,"toggle":false,"text":"\uE32A","text_font":50,"align":1}
+{"id":56,"obj":"label","x":174,"y":350,"w":133,"h":20,"text":"Modo Noche","text_font":20,"align":1}
+
+{"id":10,"obj":"btn","x":328,"y":280,"w":133,"h":70,"toggle":false,"text":"\uE594","text_font":50,"align":1,"bg_color":"Navy"}
+{"id":57,"obj":"label","x":328,"y":350,"w":133,"h":20,"text":"Buenas Noches","text_font":20,"align":1}
+
+{"page":5,"comment":"---------- Page 5 ----------","click":0} // Baño
+
+{"id":95,"obj":"img","src":"L:/02.png","auto_size":0,"w":480,"h":480,"click":0}
+{"id":99,"obj":"btn","x":160,"y":420,"w":159,"h":60,"text":"Baño","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":26,"click":0,"align":1}
+
+// Luces
+{"id":1,"obj":"btn","x":20,"y":20,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":50,"obj":"label","x":20,"y":120,"w":133,"h":20,"text":"Baño","text_font":20,"align":1,"click":0}
+
+{"id":2,"obj":"btn","x":174,"y":20,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":51,"obj":"label","x":174,"y":120,"w":133,"h":20,"text":"LED Baño","text_font":20,"align":1,"click":0}
+
+{"id":3,"obj":"btn","x":328,"y":20,"w":133,"h":100,"toggle":false,"text":"\uE9A0","text_font":50,"align":1,"bg_color":"Indigo"}
+{"id":52,"obj":"label","x":328,"y":120,"w":133,"h":20,"text":"Modo Relax","text_font":20,"align":1,"click":0}
+
+// Color Picker 2
+{"id":53,"obj":"label","x":30,"y":178,"w":220,"h":20,"text":"LED Baño","text_font":20,"align":0} // Titul,"click":0o
+{"id":4,"obj":"cpicker","x":50,"y":210,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":5,"obj":"slider","x":50,"y":270,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+
+{"page":6,"comment":"---------- Page 6 ----------","click":0} // Terraza
+
+{"id":95,"obj":"img","src":"L:/01.png","auto_size":0,"w":480,"h":480,"click":0}
+{"id":99,"obj":"btn","x":160,"y":420,"w":159,"h":60,"text":"Terraza","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":24,"click":0,"align":1}
+
+// Luces
+{"id":1,"obj":"btn","x":20,"y":20,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":50,"obj":"label","x":20,"y":120,"w":133,"h":20,"text":"Escaleras","text_font":20,"align":1,"click":0}
+
+{"id":2,"obj":"btn","x":174,"y":20,"w":133,"h":100,"toggle":true,"text":"\uE335","text_font":50,"align":1,"enabled":0}
+{"id":51,"obj":"label","x":174,"y":120,"w":133,"h":20,"text":"LED Terraza","text_font":20,"align":1,"click":0}
+
+//Persiana Puerta Terraza
+{"id":52,"obj":"obj","x":330,"y":20,"w":133,"h":210,"click":0,"radius":10,"bg_color":"black","bg_grad_dir":0,"bg_opa":100}
+{"id":3,"obj":"btn","x":405,"y":35,"w":45,"h":45,"toggle":false,"text":"\uE05D","text_font":33,"align":1} // Subir
+{"id":4,"obj":"slider","x":345,"y":44,"w":35,"h":160,"min":0,"max":100} // Slider
+{"id":5,"obj":"btn","x":405,"y":170,"w":45,"h":45,"toggle":false,"text":"\uE045","text_font":33,"align":1} // Bajar
+{"id":80,"obj":"label","x":385,"y":110,"w":80,"h":20,"text":"Estado","text_font":16,"align":1} // Estado
+
+// Color Terraza
+{"id":53,"obj":"label","x":30,"y":218,"w":220,"h":20,"text":"LED Terraza","text_font":20,"align":0} // Titul,"click":0o
+{"id":6,"obj":"cpicker","x":50,"y":250,"w":380,"h":35} // Color Picker: ,"mode_fixed":true,"mode":"value"
+{"id":7,"obj":"slider","x":50,"y":310,"w":380,"h":25,"min":0,"max":100} // Slider Brillo
+
+// Dropdown efectos
+{"id":98,"obj":"dropdown","x":140,"y":350,"w":200,"h":30,"text_font":20,"options":"Solid\nPS Dancing Shadows\nLighthouse\nFire Flicker\nTwo Dots\nColorwaves"}
+
+
+{"page":7,"comment":"---------- Page 7 ----------","click":0} // Terraza
+
+{"id":99,"obj":"btn","x":160,"y":420,"w":159,"h":60,"text":"Calefacción","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":24,"click":0,"align":1}
+
+{"id":1,"obj":"arc","x":10,"y":20,"w":230,"h":230,"min":180,"max":300,"val":250,"border_side":0,"type":0,"rotation":0,"start_angle":135,"end_angle":45,"adjustable":"true","line_width":30,"line_width10":30,"line_color10":"#34bdeb","bg_opa":0,"pad_top20":5,"pad_bottom20":5,"pad_left20":5,"pad_right20":5,"pad_top":5,"pad_bottom":5,"pad_left":5,"pad_right":5}
+
+{"id":2,"obj":"arc","x":245,"y":20,"w":230,"h":230,"min":170,"max":300,"val":250,"border_side":0,"type":0,"rotation":0,"start_angle":135,"end_angle":45,"adjustable":"true","line_width":30,"line_width10":30,"line_color10":"#eb7134","bg_opa":0,"pad_top20":5,"pad_bottom20":5,"pad_left20":5,"pad_right20":5,"pad_top":5,"pad_bottom":5,"pad_left":5,"pad_right":5}
+
+{"id":3,"obj":"switch","x":60,"y":250,"w":90,"h":40,"radius":4}
+{"id":4,"obj":"dropdown","x":60,"y":120,"w":120,"h":30,"text_font":20,"options":"Frio\nCalor"}
+
+{"id":5,"obj":"switch","x":260,"y":250,"w":90,"h":40,"radius":4}
+
+
+{"comment":"---------- All Pages ----------"}
+
+{"page":0,"id":50,"obj":"btn","action":"prev","x":0,"y":420,"w":159,"h":60,"text":"\uE141","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
+//{"page":0,"id":51,"obj":"btn","action":"back","x":160,"y":420,"w":159,"h":60,"text":"Recibidor\nCocina","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":20,"click":0,"align":1}
+{"page":0,"id":52,"obj":"btn","action":"next","x":320,"y":420,"w":159,"h":60,"text":"\uE142","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
+//{"page":0,"id":10,"obj":"obj","swipe":1,"x":0,"y":0,"h":480,"w":480,"opacity":0,"bg_opa":100}
+
+// Tapa Negra
+//{"page":0,"id":99,"obj":"obj","x":-2,"y":-2,"w":484,"h":804,"radius":0,"hidden":1,"bg_grad_dir":0,"bg_color":"black","bg_grad_dir":0,"bg_opa":100}
+
+{"comment":"---------- Limit page prev/next between X and X ----------"}
+{"page":1,"id":0,"prev":7}
+{"page":7,"id":0,"next":1}

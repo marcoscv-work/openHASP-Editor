@@ -1,0 +1,1819 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>openHASP Editor</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101214;
+      --panel: #1b1f24;
+      --panel-2: #242a31;
+      --text: #eef2f4;
+      --muted: #9da8b3;
+      --accent: #4ec3a3;
+      --border: #39424d;
+      --screen-width: 480px;
+      --screen-height: 480px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(78, 195, 163, 0.08), transparent 32%),
+        radial-gradient(circle at 78% 12%, rgba(240, 194, 75, 0.11), transparent 24%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(260px, 340px) minmax(540px, 1fr) minmax(300px, 380px);
+    }
+
+    aside,
+    .editor {
+      border-right: 1px solid var(--border);
+      background: rgba(17, 20, 24, 0.88);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .editor {
+      border-right: 0;
+      border-left: 1px solid var(--border);
+      max-height: 100vh;
+      overflow: auto;
+    }
+
+    main {
+      min-width: 0;
+      padding: 28px;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .editor-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      padding: 0;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .icon-button[hidden] {
+      display: none;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    select,
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    input[type="range"],
+    textarea {
+      width: 100%;
+    }
+
+    select,
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    textarea {
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 11px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      text-transform: none;
+    }
+
+    textarea {
+      min-height: 220px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    input[type="file"] {
+      font-size: 12px;
+    }
+
+    #screenWidth,
+    #screenHeight {
+      max-width: 90px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 84px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .resolution-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .quad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 12px;
+      background: var(--panel-2);
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+      gap: 8px;
+    }
+
+    .tabs button {
+      min-height: 38px;
+      padding: 8px;
+    }
+
+    .tabs button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #06100d;
+    }
+
+    .tabs button.add-page {
+      grid-column: span 2;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .stats {
+      display: grid;
+      gap: 7px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(36, 42, 49, 0.65);
+      font-size: 13px;
+    }
+
+    .stage-wrap {
+      width: min(100%, calc(var(--screen-width) + 48px));
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+    }
+
+    .phone {
+      width: calc((var(--screen-width) + 28px) * var(--zoom, 1));
+      height: calc((var(--screen-height) + 28px) * var(--zoom, 1));
+      padding: calc(14px * var(--zoom, 1));
+      border-radius: calc(28px * var(--zoom, 1));
+      background: #050607;
+      box-shadow: 0 24px 90px rgba(0, 0, 0, 0.46), inset 0 0 0 1px #2c333b;
+    }
+
+    .screen {
+      position: relative;
+      width: var(--screen-width);
+      height: var(--screen-height);
+      overflow: hidden;
+      border-radius: calc(13px * var(--zoom, 1));
+      background: #0b0d10;
+      transform: scale(var(--zoom, 1));
+      transform-origin: top left;
+    }
+
+    .lv {
+      position: absolute;
+      overflow: hidden;
+      color: #fff;
+      white-space: pre-line;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .lv.inspectable {
+      cursor: help;
+      outline: 1px solid transparent;
+      outline-offset: 2px;
+    }
+
+    .lv.inspectable:hover {
+      outline-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(78, 195, 163, 0.18);
+    }
+
+    .lv.selected {
+      outline: 2px solid #f0c24b;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(240, 194, 75, 0.18);
+      z-index: 40;
+    }
+
+    .lv-img {
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .lv-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: linear-gradient(#3b424c, #252b32);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      user-select: none;
+      white-space: pre-line;
+    }
+
+    .lv-btn.disabled {
+      opacity: 0.64;
+    }
+
+    .lv-label {
+      display: flex;
+      align-items: center;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.72);
+      white-space: pre;
+    }
+
+    .mdi-icon {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      fill: currentColor;
+      line-height: 1;
+      vertical-align: -0.14em;
+    }
+
+    .lv-obj {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .lv-slider {
+      border-radius: 999px;
+      background: #343b44;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .lv-slider::before {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      width: 46%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #4ec3a3, #8dd7ff);
+    }
+
+    .lv-slider.vertical::before {
+      width: auto;
+      height: 46%;
+      top: auto;
+    }
+
+    .lv-cpicker {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: linear-gradient(90deg, #f44336, #ff9800, #ffeb3b, #4caf50, #00bcd4, #3f51b5, #9c27b0, #f44336);
+    }
+
+    .lv-dropdown {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 4px;
+      background: #242a31;
+      color: #fff;
+    }
+
+    .lv-dropdown::after {
+      content: "▾";
+      margin-left: auto;
+      color: #cbd3dc;
+    }
+
+    .lv-switch {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: #303741;
+    }
+
+    .lv-switch::before {
+      content: "";
+      position: absolute;
+      width: calc(50% - 4px);
+      height: calc(100% - 8px);
+      left: 4px;
+      top: 4px;
+      border-radius: 999px;
+      background: #d9e1e8;
+    }
+
+    .lv-arc {
+      overflow: visible;
+      background: transparent;
+    }
+
+    .lv-arc svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .lv-arc-track,
+    .lv-arc-value {
+      fill: none;
+      stroke-linecap: butt;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .tooltip {
+      position: fixed;
+      z-index: 1000;
+      max-width: min(360px, calc(100vw - 24px));
+      display: none;
+      padding: 10px 12px;
+      border: 1px solid rgba(78, 195, 163, 0.55);
+      border-radius: 8px;
+      background: rgba(10, 13, 15, 0.96);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.45;
+      pointer-events: none;
+      white-space: normal;
+    }
+
+    .tooltip strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .tooltip code {
+      color: #c7f2e6;
+      overflow-wrap: anywhere;
+    }
+
+    .tooltip .muted-line {
+      color: var(--muted);
+    }
+
+    .empty-state {
+      padding: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .editor-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .editor-actions button {
+      min-height: 40px;
+    }
+
+    .error {
+      color: #ffb2a8;
+    }
+
+    @media (max-width: 1220px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .editor {
+        max-height: none;
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+
+      main {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div>
+        <h1>openHASP Editor</h1>
+        <p class="muted">Local preview and editor for openHASP JSONL pages. It draws an LVGL-like layout and keeps object IDs visible for inspection.</p>
+      </div>
+
+      <label>
+        File
+        <select id="fileSelect">
+          <option value="pages_480_vero.jsonl">pages_480_vero.jsonl</option>
+          <option value="pages_480.jsonl">pages_480.jsonl</option>
+          <option value="pages_1.jsonl">pages_1.jsonl</option>
+        </select>
+      </label>
+
+      <div class="row">
+        <label>
+          L:/ Folder
+          <input id="assetBase" type="text" value="Imagenes OpenHASP Vero">
+        </label>
+        <button id="reloadBtn">Load</button>
+      </div>
+
+      <label>
+        MQTT Node
+        <input id="mqttNode" type="text" value="pantalla">
+      </label>
+
+      <label>
+        Screen Preset
+        <select id="resolutionPreset">
+          <option value="480x480">480x480 - Square / Golden Security / Makerfabs</option>
+          <option value="320x240">320x240 - Landscape 2.4/2.8 inch</option>
+          <option value="240x320">240x320 - Portrait ILI9341</option>
+          <option value="240x240">240x240 - Round / ESP32-2424S012</option>
+          <option value="480x272">480x272 - 4.3 inch wide</option>
+          <option value="480x320">480x320 - Landscape 3.5 inch</option>
+          <option value="320x480">320x480 - Portrait WT32/NScreen32</option>
+          <option value="800x480">800x480 - 5/7 inch wide</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+
+      <div class="resolution-row">
+        <label>
+          Width
+          <input id="screenWidth" type="number" min="100" max="2000" step="1" value="480">
+        </label>
+        <label>
+          Height
+          <input id="screenHeight" type="number" min="100" max="2000" step="1" value="480">
+        </label>
+      </div>
+
+      <label>
+        Upload JSONL
+        <input id="upload" type="file" accept=".jsonl,.txt,.cmd,application/json">
+      </label>
+
+      <label>
+        Zoom
+        <input id="zoom" type="range" min="0.55" max="1.45" value="1" step="0.05">
+      </label>
+
+      <div>
+        <div class="muted" style="margin-bottom: 8px;">Pages</div>
+        <div id="tabs" class="tabs"></div>
+      </div>
+
+      <div id="stats" class="stats"></div>
+    </aside>
+
+    <main>
+      <div class="stage-wrap">
+        <div class="phone">
+          <div id="screen" class="screen"></div>
+        </div>
+        <div id="caption" class="caption"></div>
+      </div>
+      <div id="tooltip" class="tooltip" role="tooltip"></div>
+    </main>
+
+    <section class="editor">
+      <div>
+        <div class="editor-heading">
+          <button id="backToPageBtn" class="icon-button" title="Back to Page" aria-label="Back to Page" hidden>‹</button>
+          <h1 id="editorTitle">Page Editor</h1>
+        </div>
+        <p id="editorSubtitle" class="muted">Configure the current page when no object is selected. Select any object, including labels, to edit element properties.</p>
+      </div>
+
+      <div id="pageFields">
+        <div class="stats" id="pageSummary"></div>
+
+        <label>
+          Background Color
+          <input id="pageBgColor" type="text" placeholder="#000000 or black">
+        </label>
+
+        <label>
+          Background Image
+          <input id="pageBgImage" type="text" placeholder="L:/04.png">
+        </label>
+
+        <label>
+          Page Click
+          <input id="pageClick" type="number" step="1">
+        </label>
+
+        <div class="row">
+          <label>
+            Add Element
+            <select id="newObjectType">
+              <option value="btn">Button</option>
+              <option value="switch">Switch</option>
+              <option value="checkbox">Checkbox</option>
+              <option value="label">Label</option>
+              <option value="led">LED</option>
+              <option value="spinner">Spinner</option>
+              <option value="obj">Base Object</option>
+              <option value="line">Line</option>
+              <option value="img">Image</option>
+              <option value="cpicker">Color Picker</option>
+              <option value="roller">Roller</option>
+              <option value="dropdown">Dropdown</option>
+              <option value="btnmatrix">Button Matrix</option>
+              <option value="msgbox">Messagebox</option>
+              <option value="tabview">Tabview</option>
+              <option value="tab">Tab</option>
+              <option value="bar">Progress Bar</option>
+              <option value="slider">Slider</option>
+              <option value="arc">Arc</option>
+              <option value="linemeter">Line Meter</option>
+              <option value="gauge">Gauge</option>
+              <option value="qrcode">QR Code</option>
+            </select>
+          </label>
+          <button id="addElementBtn">Add</button>
+        </div>
+
+        <label>
+          Raw Page JSON
+          <textarea id="pageJsonEditor" spellcheck="false"></textarea>
+        </label>
+
+        <div id="pageError" class="error"></div>
+
+        <div class="editor-actions">
+          <button id="applyPageJsonBtn">Apply Page</button>
+          <button id="applyBackgroundBtn">Apply Background</button>
+          <button id="pageUndoBtn">Undo</button>
+          <button id="pageRedoBtn">Redo</button>
+          <button id="pageDownloadBtn">Download JSONL</button>
+          <button id="deletePageBtn">Delete Page</button>
+          <button id="selectFirstBtn">Select First</button>
+        </div>
+      </div>
+
+      <div id="editorFields" hidden>
+        <div class="stats" id="selectionSummary"></div>
+
+        <div class="quad">
+          <label>
+            X
+            <input id="editX" type="number" step="1">
+          </label>
+          <label>
+            Y
+            <input id="editY" type="number" step="1">
+          </label>
+          <label>
+            W
+            <input id="editW" type="number" step="1">
+          </label>
+          <label>
+            H
+            <input id="editH" type="number" step="1">
+          </label>
+        </div>
+
+        <label>
+          Raw Element JSON
+          <textarea id="jsonEditor" spellcheck="false"></textarea>
+        </label>
+
+        <div id="editorError" class="error"></div>
+
+        <div class="editor-actions">
+          <button id="applyJsonBtn">Apply JSON</button>
+          <button id="resetElementBtn">Reset View</button>
+          <button id="undoBtn">Undo</button>
+          <button id="redoBtn">Redo</button>
+          <button id="downloadBtn">Download JSONL</button>
+          <button id="deleteElementBtn">Delete Element</button>
+          <button id="clearSelectionBtn">Page Editor</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      filename: "pages_480_vero.jsonl",
+      pages: new Map(),
+      pageSettings: new Map(),
+      globals: [],
+      currentPage: 1,
+      parseErrors: [],
+      sourceLines: 0,
+      selectedUid: null,
+      uidCounter: 1,
+      undoStack: [],
+      redoStack: []
+    };
+
+    const els = {
+      fileSelect: document.querySelector("#fileSelect"),
+      assetBase: document.querySelector("#assetBase"),
+      mqttNode: document.querySelector("#mqttNode"),
+      resolutionPreset: document.querySelector("#resolutionPreset"),
+      screenWidth: document.querySelector("#screenWidth"),
+      screenHeight: document.querySelector("#screenHeight"),
+      reloadBtn: document.querySelector("#reloadBtn"),
+      upload: document.querySelector("#upload"),
+      zoom: document.querySelector("#zoom"),
+      tabs: document.querySelector("#tabs"),
+      stats: document.querySelector("#stats"),
+      screen: document.querySelector("#screen"),
+      caption: document.querySelector("#caption"),
+      tooltip: document.querySelector("#tooltip"),
+      editorTitle: document.querySelector("#editorTitle"),
+      editorSubtitle: document.querySelector("#editorSubtitle"),
+      pageFields: document.querySelector("#pageFields"),
+      pageSummary: document.querySelector("#pageSummary"),
+      pageBgColor: document.querySelector("#pageBgColor"),
+      pageBgImage: document.querySelector("#pageBgImage"),
+      pageClick: document.querySelector("#pageClick"),
+      newObjectType: document.querySelector("#newObjectType"),
+      addElementBtn: document.querySelector("#addElementBtn"),
+      pageJsonEditor: document.querySelector("#pageJsonEditor"),
+      pageError: document.querySelector("#pageError"),
+      applyPageJsonBtn: document.querySelector("#applyPageJsonBtn"),
+      applyBackgroundBtn: document.querySelector("#applyBackgroundBtn"),
+      pageUndoBtn: document.querySelector("#pageUndoBtn"),
+      pageRedoBtn: document.querySelector("#pageRedoBtn"),
+      pageDownloadBtn: document.querySelector("#pageDownloadBtn"),
+      deletePageBtn: document.querySelector("#deletePageBtn"),
+      selectFirstBtn: document.querySelector("#selectFirstBtn"),
+      editorFields: document.querySelector("#editorFields"),
+      selectionSummary: document.querySelector("#selectionSummary"),
+      editX: document.querySelector("#editX"),
+      editY: document.querySelector("#editY"),
+      editW: document.querySelector("#editW"),
+      editH: document.querySelector("#editH"),
+      jsonEditor: document.querySelector("#jsonEditor"),
+      editorError: document.querySelector("#editorError"),
+      applyJsonBtn: document.querySelector("#applyJsonBtn"),
+      resetElementBtn: document.querySelector("#resetElementBtn"),
+      backToPageBtn: document.querySelector("#backToPageBtn"),
+      undoBtn: document.querySelector("#undoBtn"),
+      redoBtn: document.querySelector("#redoBtn"),
+      downloadBtn: document.querySelector("#downloadBtn"),
+      deleteElementBtn: document.querySelector("#deleteElementBtn"),
+      clearSelectionBtn: document.querySelector("#clearSelectionBtn")
+    };
+
+    function stripComment(line) {
+      let quote = false;
+      let escaped = false;
+      for (let i = 0; i < line.length - 1; i++) {
+        const ch = line[i];
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escaped = quote;
+          continue;
+        }
+        if (ch === "\"") quote = !quote;
+        if (!quote && ch === "/" && line[i + 1] === "/") return line.slice(0, i).trim();
+      }
+      return line.trim();
+    }
+
+    function parseJsonl(text) {
+      const pages = new Map();
+      const pageSettings = new Map();
+      const globals = [];
+      const errors = [];
+      let activePage = null;
+      state.uidCounter = 1;
+
+      text.split(/\r?\n/).forEach((rawLine, index) => {
+        const clean = stripComment(rawLine);
+        if (!clean) return;
+        try {
+          const item = JSON.parse(clean);
+          if (Number.isInteger(item.page) && !item.obj) {
+            activePage = item.page;
+            if (activePage > 0) {
+              if (!pages.has(activePage)) pages.set(activePage, []);
+              pageSettings.set(activePage, { ...item, __page: activePage });
+            }
+            return;
+          }
+
+          const targetPage = Number.isInteger(item.page) ? item.page : activePage;
+          if (!item.obj || targetPage === null) return;
+          item.__page = targetPage;
+          item.__uid = state.uidCounter++;
+
+          if (targetPage === 0) {
+            globals.push(item);
+          } else {
+            if (!pages.has(targetPage)) pages.set(targetPage, []);
+            pages.get(targetPage).push(item);
+          }
+        } catch (error) {
+          errors.push({ line: index + 1, text: rawLine, message: error.message });
+        }
+      });
+
+      for (const page of pages.keys()) {
+        if (!pageSettings.has(page)) pageSettings.set(page, { page, comment: `---------- Page ${page} ----------`, click: 0, __page: page });
+      }
+
+      return { pages, pageSettings, globals, errors, sourceLines: text.split(/\r?\n/).length };
+    }
+
+    async function loadSelectedFile() {
+      state.filename = els.fileSelect.value;
+      try {
+        const response = await fetch(encodeURI(state.filename), { cache: "no-store" });
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        applySource(await response.text(), state.filename);
+      } catch (error) {
+        els.stats.innerHTML = `<span class="error">Could not load ${state.filename}: ${error.message}. Open this viewer from the local server or use “Upload JSONL”.</span>`;
+      }
+    }
+
+    function applySource(text, filename) {
+      const result = parseJsonl(text);
+      state.pages = result.pages;
+      state.pageSettings = result.pageSettings;
+      state.globals = result.globals;
+      state.parseErrors = result.errors;
+      state.sourceLines = result.sourceLines;
+      state.filename = filename;
+      state.selectedUid = null;
+      state.undoStack = [];
+      state.redoStack = [];
+
+      const firstPage = [...state.pages.keys()].sort((a, b) => a - b)[0] || 1;
+      if (!state.pages.has(state.currentPage)) state.currentPage = firstPage;
+      renderTabs();
+      render();
+      updateEditor();
+    }
+
+    function renderTabs() {
+      els.tabs.innerHTML = "";
+      [...state.pages.keys()].sort((a, b) => a - b).forEach(page => {
+        const button = document.createElement("button");
+        button.textContent = page;
+        button.className = page === state.currentPage ? "active" : "";
+        button.addEventListener("click", () => {
+          state.currentPage = page;
+          state.selectedUid = null;
+          renderTabs();
+          render();
+          updateEditor();
+        });
+        els.tabs.append(button);
+      });
+
+      const addButton = document.createElement("button");
+      addButton.textContent = "Add Page";
+      addButton.className = "add-page";
+      addButton.addEventListener("click", addPage);
+      els.tabs.append(addButton);
+    }
+
+    function valueOr(item, key, fallback) {
+      return item[key] === undefined ? fallback : item[key];
+    }
+
+    function color(item, key, fallback) {
+      const value = item[key];
+      if (!value) return fallback;
+      return String(value);
+    }
+
+    function opacityFromLvgl(value, fallback = 1) {
+      if (value === undefined) return fallback;
+      const numeric = Number(value);
+      if (Number.isNaN(numeric)) return fallback;
+      return Math.max(0, Math.min(1, numeric / 100));
+    }
+
+    function alignFlex(align) {
+      if (align === 0) return "flex-start";
+      if (align === 2) return "flex-end";
+      return "center";
+    }
+
+    function localAsset(src) {
+      if (!src) return "";
+      const text = String(src);
+      if (text.startsWith("L:/")) {
+        const base = els.assetBase.value.replace(/\/$/, "");
+        return encodeURI(`${base}/${text.slice(3)}`);
+      }
+      return text;
+    }
+
+    function screenSize() {
+      return {
+        width: Number(els.screenWidth.value) || 480,
+        height: Number(els.screenHeight.value) || 480
+      };
+    }
+
+    function applyScreenSize(width, height) {
+      els.screenWidth.value = width;
+      els.screenHeight.value = height;
+      document.documentElement.style.setProperty("--screen-width", `${width}px`);
+      document.documentElement.style.setProperty("--screen-height", `${height}px`);
+      render();
+      updateEditor();
+    }
+
+    function applyResolutionPreset() {
+      if (els.resolutionPreset.value === "custom") return;
+      const [width, height] = els.resolutionPreset.value.split("x").map(Number);
+      applyScreenSize(width, height);
+    }
+
+    function syncCustomResolution() {
+      const { width, height } = screenSize();
+      const value = `${width}x${height}`;
+      const known = [...els.resolutionPreset.options].some(option => option.value === value);
+      els.resolutionPreset.value = known ? value : "custom";
+      applyScreenSize(width, height);
+    }
+
+    function fitSingleLineText(el, item) {
+      if (!item.text || String(item.text).includes("\n")) return;
+      requestAnimationFrame(() => {
+        const originalSize = Number(valueOr(item, "text_font", 16));
+        let size = originalSize;
+        while (el.scrollWidth > el.clientWidth && size > 9) {
+          size -= 1;
+          el.style.fontSize = `${size}px`;
+        }
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function objectAddress(item, page = state.currentPage) {
+      return `p${page}b${item.id}`;
+    }
+
+    function allItems() {
+      return [...state.pages.values()].flat().concat(state.globals);
+    }
+
+    function selectedItem() {
+      return allItems().find(item => item.__uid === state.selectedUid) || null;
+    }
+
+    function cleanItem(item) {
+      const copy = { ...item };
+      delete copy.__page;
+      delete copy.__uid;
+      return copy;
+    }
+
+    function captureDocumentState() {
+      return {
+        pages: [...state.pages.entries()].map(([page, items]) => [page, items.map(item => ({ ...item }))]),
+        pageSettings: [...state.pageSettings.entries()].map(([page, settings]) => [page, { ...settings }]),
+        globals: state.globals.map(item => ({ ...item })),
+        selectedUid: state.selectedUid,
+        uidCounter: state.uidCounter,
+        currentPage: state.currentPage
+      };
+    }
+
+    function restoreDocumentState(snapshot) {
+      state.pages = new Map(snapshot.pages.map(([page, items]) => [page, items.map(item => ({ ...item }))]));
+      state.pageSettings = new Map((snapshot.pageSettings || []).map(([page, settings]) => [page, { ...settings }]));
+      state.globals = snapshot.globals.map(item => ({ ...item }));
+      state.selectedUid = snapshot.selectedUid;
+      state.uidCounter = snapshot.uidCounter;
+      state.currentPage = snapshot.currentPage;
+      renderTabs();
+      render();
+      updateEditor();
+    }
+
+    function pageSettings() {
+      if (!state.pageSettings.has(state.currentPage)) {
+        state.pageSettings.set(state.currentPage, { page: state.currentPage, comment: `---------- Page ${state.currentPage} ----------`, click: 0, __page: state.currentPage });
+      }
+      return state.pageSettings.get(state.currentPage);
+    }
+
+    function cleanPageSettings(settings) {
+      const copy = { ...settings };
+      delete copy.__page;
+      return copy;
+    }
+
+    function backgroundImageObject() {
+      return (state.pages.get(state.currentPage) || []).find(item => item.obj === "img" && Number(valueOr(item, "x", 0)) === 0 && Number(valueOr(item, "y", 0)) === 0);
+    }
+
+    function pushUndoState() {
+      state.undoStack.push(captureDocumentState());
+      if (state.undoStack.length > 80) state.undoStack.shift();
+      state.redoStack = [];
+    }
+
+    function undo() {
+      const snapshot = state.undoStack.pop();
+      if (!snapshot) return;
+      state.redoStack.push(captureDocumentState());
+      restoreDocumentState(snapshot);
+    }
+
+    function redo() {
+      const snapshot = state.redoStack.pop();
+      if (!snapshot) return;
+      state.undoStack.push(captureDocumentState());
+      restoreDocumentState(snapshot);
+    }
+
+    function isTouchDisabled(item) {
+      return item.enabled === 0 || item.enabled === false || item.click === 0 || item.click === false;
+    }
+
+    function isInspectable(item) {
+      return item && item.id !== undefined;
+    }
+
+    function isPotentiallyInteractive(item) {
+      if (!item || item.id === undefined) return false;
+      if (item.action) return true;
+      if (item.obj === "arc") return String(item.adjustable) === "true" || item.adjustable === true;
+      return ["btn", "slider", "cpicker", "dropdown", "switch"].includes(item.obj);
+    }
+
+    function samplePayload(item) {
+      if (item.action) return `{"event":"up","action":"${item.action}"}`;
+      if (item.obj === "btn" && item.toggle) return "{\"event\":\"up\",\"val\":1}";
+      if (item.obj === "btn") return "{\"event\":\"up\",\"val\":0}";
+      if (item.obj === "switch") return "{\"event\":\"changed\",\"val\":1}";
+      if (item.obj === "label") return "";
+      if (item.obj === "slider" || item.obj === "arc") {
+        const value = valueOr(item, "val", valueOr(item, "min", 0));
+        return `{"event":"changed","val":${value}}`;
+      }
+      if (item.obj === "cpicker") return "{\"event\":\"changed\",\"color\":\"#ffffff\",\"r\":255,\"g\":255,\"b\":255}";
+      if (item.obj === "dropdown") return "{\"event\":\"changed\",\"val\":0,\"text\":\"" + escapeHtml(String(item.options || "").split("\n")[0] || "") + "\"}";
+      return "{\"event\":\"up\"}";
+    }
+
+    function eventSummary(item) {
+      if (item.action) return `Internal openHASP action: ${item.action}`;
+      if (item.obj === "btn") return item.toggle ? "Toggle button: down/up/long/hold/release; usually changes val" : "Momentary button: down/up/long/hold/release";
+      if (item.obj === "slider") return `Slider: changed with val ${valueOr(item, "min", 0)}-${valueOr(item, "max", 100)}`;
+      if (item.obj === "arc") return `Adjustable arc: changed with val ${valueOr(item, "min", 0)}-${valueOr(item, "max", 100)}`;
+      if (item.obj === "cpicker") return "Color picker: changed with color/r/g/b/h/s/v";
+      if (item.obj === "dropdown") return "Dropdown: changed with selected index/text";
+      if (item.obj === "switch") return "Switch: changed with val 0/1";
+      if (item.obj === "label") return "Label/text object: ID can be targeted from commands, usually no touch event";
+      return "openHASP object";
+    }
+
+    function tooltipHtml(item, page = state.currentPage) {
+      const address = objectAddress(item, page);
+      const node = els.mqttNode.value.trim() || "<nodename>";
+      const topic = `hasp/${node}/state/${address}`;
+      const commandTopic = `hasp/${node}/command/${address}`;
+      const text = String(item.text || item.options || "").replace(/\s+/g, " ").trim();
+      const label = text ? `${item.obj} · ${text}` : item.obj;
+      const disabled = isTouchDisabled(item)
+        ? `<div class="muted-line">Note: this object is disabled for touch in JSONL (<code>${item.enabled === 0 || item.enabled === false ? "enabled" : "click"}:${escapeHtml(item.enabled === 0 || item.enabled === false ? item.enabled : item.click)}</code>).</div>`
+        : "";
+      const payload = samplePayload(item);
+      const payloadLine = payload ? `<div>Example payload: <code>${escapeHtml(payload)}</code></div>` : "";
+      return `
+        <strong>${escapeHtml(label)}</strong>
+        <div>Object: <code>${escapeHtml(address)}</code> · id <code>${escapeHtml(item.id)}</code></div>
+        ${disabled}
+        <div>${escapeHtml(eventSummary(item))}</div>
+        <div>State topic: <code>${escapeHtml(topic)}</code></div>
+        ${payloadLine}
+        <div class="muted-line">Command base: <code>${escapeHtml(commandTopic)}.&lt;prop&gt;</code></div>
+      `;
+    }
+
+    function moveTooltip(event) {
+      const pad = 14;
+      const rect = els.tooltip.getBoundingClientRect();
+      let left = event.clientX + 16;
+      let top = event.clientY + 16;
+      if (left + rect.width + pad > window.innerWidth) left = event.clientX - rect.width - 16;
+      if (top + rect.height + pad > window.innerHeight) top = event.clientY - rect.height - 16;
+      els.tooltip.style.left = `${Math.max(pad, left)}px`;
+      els.tooltip.style.top = `${Math.max(pad, top)}px`;
+    }
+
+    function attachInspector(el, item, page = state.currentPage) {
+      if (!isInspectable(item)) return;
+      el.classList.add("inspectable");
+      el.addEventListener("mouseenter", event => {
+        els.tooltip.innerHTML = tooltipHtml(item, page);
+        els.tooltip.style.display = "block";
+        moveTooltip(event);
+      });
+      el.addEventListener("mousemove", moveTooltip);
+      el.addEventListener("mouseleave", () => {
+        els.tooltip.style.display = "none";
+      });
+    }
+
+    function selectItem(item, shouldRender = true) {
+      state.selectedUid = item?.__uid ?? null;
+      updateEditor();
+      if (shouldRender) render();
+    }
+
+    function clearSelection() {
+      selectItem(null);
+    }
+
+    function updateEditor() {
+      const item = selectedItem();
+      els.editorError.textContent = "";
+      els.pageError.textContent = "";
+      if (!item) {
+        els.editorTitle.textContent = "Page Editor";
+        els.editorSubtitle.textContent = "Configure the current page, background, and page-level JSON. Select an object to edit element properties.";
+        els.backToPageBtn.hidden = true;
+        els.pageFields.hidden = false;
+        els.editorFields.hidden = true;
+        updatePageEditor();
+        return;
+      }
+
+      els.editorTitle.textContent = "Element Editor";
+      els.editorSubtitle.textContent = "Edit the selected object. Drag it in the preview or change its JSON properties here.";
+      els.backToPageBtn.hidden = false;
+      els.pageFields.hidden = true;
+      els.editorFields.hidden = false;
+      const page = item.__page ?? state.currentPage;
+      const address = objectAddress(item, page);
+      els.selectionSummary.innerHTML = `
+        <div><strong>${escapeHtml(address)}</strong></div>
+        <div>Type: ${escapeHtml(item.obj)} · ID: ${escapeHtml(item.id)}</div>
+        <div>Page: ${escapeHtml(page)} · ${isTouchDisabled(item) ? "Touch disabled" : "Touch enabled or default"}</div>
+      `;
+      els.editX.value = valueOr(item, "x", 0);
+      els.editY.value = valueOr(item, "y", 0);
+      els.editW.value = valueOr(item, "w", "");
+      els.editH.value = valueOr(item, "h", "");
+      els.jsonEditor.value = JSON.stringify(cleanItem(item), null, 2);
+    }
+
+    function updatePageEditor() {
+      const settings = pageSettings();
+      const items = state.pages.get(state.currentPage) || [];
+      const bgImage = backgroundImageObject();
+      els.pageSummary.innerHTML = `
+        <div><strong>Page ${escapeHtml(state.currentPage)}</strong></div>
+        <div>${items.length} page objects · ${state.globals.length} global objects</div>
+        <div>Background: ${bgImage ? escapeHtml(bgImage.src || "image object") : "none"}</div>
+      `;
+      els.pageBgColor.value = settings.bg_color || "";
+      els.pageBgImage.value = bgImage?.src || "";
+      els.pageClick.value = valueOr(settings, "click", "");
+      els.pageJsonEditor.value = JSON.stringify(cleanPageSettings(settings), null, 2);
+    }
+
+    function applyPageJson() {
+      try {
+        const parsed = JSON.parse(els.pageJsonEditor.value);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Page JSON must be an object.");
+        if (!Number.isInteger(parsed.page)) parsed.page = state.currentPage;
+        pushUndoState();
+        state.pageSettings.set(state.currentPage, { ...parsed, page: state.currentPage, __page: state.currentPage });
+        els.pageError.textContent = "";
+        render();
+        updateEditor();
+      } catch (error) {
+        els.pageError.textContent = error.message;
+      }
+    }
+
+    function applyBackground() {
+      pushUndoState();
+      const settings = pageSettings();
+      const colorValue = els.pageBgColor.value.trim();
+      const clickValue = els.pageClick.value;
+      if (colorValue) settings.bg_color = colorValue;
+      else delete settings.bg_color;
+      if (clickValue === "") delete settings.click;
+      else settings.click = Number(clickValue);
+
+      const src = els.pageBgImage.value.trim();
+      const items = state.pages.get(state.currentPage) || [];
+      const size = screenSize();
+      if (src) {
+        let bg = backgroundImageObject();
+        if (!bg) {
+          bg = {
+            id: nextAvailableId(items),
+            obj: "img",
+            src,
+            auto_size: 0,
+            x: 0,
+            y: 0,
+            w: size.width,
+            h: size.height,
+            click: 0,
+            __page: state.currentPage,
+            __uid: state.uidCounter++
+          };
+          items.unshift(bg);
+          state.pages.set(state.currentPage, items);
+        }
+        bg.src = src;
+        bg.x = 0;
+        bg.y = 0;
+        bg.w = Number(valueOr(bg, "w", size.width));
+        bg.h = Number(valueOr(bg, "h", size.height));
+        bg.click = 0;
+      }
+      render();
+      updateEditor();
+    }
+
+    function nextAvailableId(items) {
+      const used = new Set(items.map(item => Number(item.id)).filter(Number.isFinite));
+      let id = 95;
+      while (used.has(id)) id += 1;
+      return id;
+    }
+
+    function nextPageNumber() {
+      const pages = [...state.pages.keys()];
+      if (!pages.length) return 1;
+      let page = 1;
+      while (state.pages.has(page)) page += 1;
+      return page;
+    }
+
+    function addPage() {
+      pushUndoState();
+      const page = nextPageNumber();
+      state.pages.set(page, []);
+      state.pageSettings.set(page, {
+        page,
+        comment: `---------- Page ${page} ----------`,
+        click: 0,
+        __page: page
+      });
+      state.currentPage = page;
+      state.selectedUid = null;
+      renderTabs();
+      render();
+      updateEditor();
+    }
+
+    function deleteCurrentPage() {
+      if (!state.pages.has(state.currentPage)) return;
+      pushUndoState();
+      const oldPage = state.currentPage;
+      state.pages.delete(oldPage);
+      state.pageSettings.delete(oldPage);
+      state.selectedUid = null;
+      const remaining = [...state.pages.keys()].sort((a, b) => a - b);
+      if (!remaining.length) {
+        state.pages.set(1, []);
+        state.pageSettings.set(1, { page: 1, comment: "---------- Page 1 ----------", click: 0, __page: 1 });
+        state.currentPage = 1;
+      } else {
+        state.currentPage = remaining.find(page => page > oldPage) || remaining[remaining.length - 1];
+      }
+      renderTabs();
+      render();
+      updateEditor();
+    }
+
+    function centeredRect(width = 120, height = 50) {
+      const size = screenSize();
+      return {
+        x: Math.max(0, Math.round((size.width - width) / 2)),
+        y: Math.max(0, Math.round((size.height - height) / 2)),
+        w: width,
+        h: height
+      };
+    }
+
+    function defaultObjectForType(type) {
+      const items = state.pages.get(state.currentPage) || [];
+      const base = {
+        id: nextAvailableId(items),
+        obj: type,
+        ...centeredRect()
+      };
+      const defaults = {
+        btn: { ...base, text: "Button", align: 1, text_font: 20 },
+        switch: { ...base, ...centeredRect(90, 40), radius: 4 },
+        checkbox: { ...base, ...centeredRect(160, 40), text: "Checkbox" },
+        label: { ...base, ...centeredRect(160, 32), text: "Label", text_font: 20, align: 1 },
+        led: { ...base, ...centeredRect(40, 40), color: "#00ff00" },
+        spinner: { ...base, ...centeredRect(80, 80) },
+        obj: { ...base, ...centeredRect(120, 80), radius: 8, bg_color: "#303741" },
+        line: { ...base, points: [[0, 0], [100, 0]], line_width: 3, line_color: "#ffffff" },
+        img: { ...base, ...centeredRect(120, 120), src: "L:/image.png", auto_size: 0, click: 0 },
+        cpicker: { ...base, ...centeredRect(220, 35) },
+        roller: { ...base, ...centeredRect(160, 100), options: "One\nTwo\nThree", selected: 0 },
+        dropdown: { ...base, ...centeredRect(180, 36), options: "One\nTwo\nThree", text_font: 18 },
+        btnmatrix: { ...base, ...centeredRect(220, 100), options: ["One", "Two", "\n", "Three", "Four", ""] },
+        msgbox: { ...base, ...centeredRect(260, 160), text: "Message", options: ["OK"], auto_close: 0 },
+        tabview: { ...base, ...centeredRect(260, 180) },
+        tab: { ...base, text: "Tab" },
+        bar: { ...base, ...centeredRect(220, 30), min: 0, max: 100, val: 50 },
+        slider: { ...base, ...centeredRect(220, 25), min: 0, max: 100, val: 50 },
+        arc: { ...base, ...centeredRect(160, 160), min: 0, max: 100, val: 50, start_angle: 135, end_angle: 45, line_width: 18, line_color10: "#4ec3a3", adjustable: "true" },
+        linemeter: { ...base, ...centeredRect(140, 140), min: 0, max: 100, val: 50 },
+        gauge: { ...base, ...centeredRect(160, 160), min: 0, max: 100, val: 50 },
+        qrcode: { ...base, ...centeredRect(140, 140), text: "https://www.openhasp.com" }
+      };
+      return defaults[type] || base;
+    }
+
+    function addElement() {
+      const type = els.newObjectType.value;
+      pushUndoState();
+      const items = state.pages.get(state.currentPage) || [];
+      const item = {
+        ...defaultObjectForType(type),
+        __page: state.currentPage,
+        __uid: state.uidCounter++
+      };
+      items.push(item);
+      state.pages.set(state.currentPage, items);
+      selectItem(item);
+    }
+
+    function deleteSelectedElement() {
+      const item = selectedItem();
+      if (!item) return;
+      pushUndoState();
+      const uid = item.__uid;
+      if (item.__page === 0) {
+        state.globals = state.globals.filter(candidate => candidate.__uid !== uid);
+      } else {
+        const page = item.__page ?? state.currentPage;
+        const items = state.pages.get(page) || [];
+        state.pages.set(page, items.filter(candidate => candidate.__uid !== uid));
+      }
+      state.selectedUid = null;
+      render();
+      updateEditor();
+    }
+
+    function setSelectedNumeric(key, value) {
+      const item = selectedItem();
+      if (!item) return;
+      pushUndoState();
+      const numeric = Number(value);
+      if (Number.isNaN(numeric)) {
+        delete item[key];
+      } else {
+        item[key] = numeric;
+      }
+      updateEditor();
+      render();
+    }
+
+    function applyJsonEditor() {
+      const item = selectedItem();
+      if (!item) return;
+      try {
+        const parsed = JSON.parse(els.jsonEditor.value);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Element JSON must be an object.");
+        if (!parsed.obj) throw new Error("Element JSON must include an obj property.");
+        pushUndoState();
+        const page = item.__page;
+        const uid = item.__uid;
+        Object.keys(item).forEach(key => delete item[key]);
+        Object.assign(item, parsed, { __page: page, __uid: uid });
+        els.editorError.textContent = "";
+        updateEditor();
+        render();
+      } catch (error) {
+        els.editorError.textContent = error.message;
+      }
+    }
+
+    function serializeJsonl() {
+      const lines = [];
+      [...state.pages.keys()].sort((a, b) => a - b).forEach(page => {
+        lines.push(JSON.stringify(cleanPageSettings(state.pageSettings.get(page) || { page, comment: `---------- Page ${page} ----------`, click: 0 })));
+        lines.push("");
+        (state.pages.get(page) || []).forEach(item => lines.push(JSON.stringify(cleanItem(item))));
+        lines.push("");
+      });
+      state.globals.forEach(item => lines.push(JSON.stringify(cleanItem(item))));
+      return `${lines.join("\n")}\n`;
+    }
+
+    function downloadJsonl() {
+      const blob = new Blob([serializeJsonl()], { type: "application/x-ndjson;charset=utf-8" });
+      const anchor = document.createElement("a");
+      const safeName = state.filename.replace(/\.jsonl$/i, "");
+      anchor.href = URL.createObjectURL(blob);
+      anchor.download = `${safeName}_variation.jsonl`;
+      anchor.click();
+      URL.revokeObjectURL(anchor.href);
+    }
+
+    function attachEditorInteractions(el, item) {
+      if (!isInspectable(item)) return;
+      el.addEventListener("click", event => {
+        event.stopPropagation();
+        selectItem(item);
+      });
+
+      let drag = null;
+      el.addEventListener("pointerdown", event => {
+        if (event.button !== 0) return;
+        event.stopPropagation();
+        selectItem(item, false);
+        el.classList.add("selected");
+        const zoom = Number(els.zoom.value) || 1;
+        drag = {
+          startX: event.clientX,
+          startY: event.clientY,
+          itemX: Number(valueOr(item, "x", 0)),
+          itemY: Number(valueOr(item, "y", 0)),
+          moved: false,
+          historySaved: false,
+          zoom
+        };
+        el.setPointerCapture(event.pointerId);
+      });
+
+      el.addEventListener("pointermove", event => {
+        if (!drag) return;
+        const dx = (event.clientX - drag.startX) / drag.zoom;
+        const dy = (event.clientY - drag.startY) / drag.zoom;
+        if (Math.abs(dx) + Math.abs(dy) > 1) drag.moved = true;
+        if (drag.moved && !drag.historySaved) {
+          pushUndoState();
+          drag.historySaved = true;
+        }
+        item.x = Math.round(drag.itemX + dx);
+        item.y = Math.round(drag.itemY + dy);
+        el.style.left = `${item.x}px`;
+        el.style.top = `${item.y}px`;
+        updateEditor();
+      });
+
+      el.addEventListener("pointerup", event => {
+        if (!drag) return;
+        el.releasePointerCapture(event.pointerId);
+        drag = null;
+      });
+    }
+
+    const openHaspIcons = {
+      E045: { name: "arrow-down", path: "M11,4H13V16L18.5,10.5L19.92,11.92L12,19.84L4.08,11.92L5.5,10.5L11,16V4Z" },
+      E05D: { name: "arrow-up", path: "M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z" },
+      E141: { name: "chevron-left", path: "M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" },
+      E142: { name: "chevron-right", path: "M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" },
+      E2DC: { name: "home", path: "M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" },
+      E32A: { name: "leaf", path: "M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" },
+      E335: { name: "lightbulb", path: "M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z" },
+      E4B9: { name: "sofa", path: "M12.5 7C12.5 5.89 13.39 5 14.5 5H18C19.1 5 20 5.9 20 7V9.16C18.84 9.57 18 10.67 18 11.97V14H12.5V7M6 11.96V14H11.5V7C11.5 5.89 10.61 5 9.5 5H6C4.9 5 4 5.9 4 7V9.15C5.16 9.56 6 10.67 6 11.96M20.66 10.03C19.68 10.19 19 11.12 19 12.12V15H5V12C5 10.9 4.11 10 3 10S1 10.9 1 12V17C1 18.1 1.9 19 3 19V21H5V19H19V21H21V19C22.1 19 23 18.1 23 17V12C23 10.79 21.91 9.82 20.66 10.03Z" },
+      E594: { name: "weather-night", path: "M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.64 6.35,17.66C9.37,20.67 14.19,20.78 17.33,17.97Z" },
+      E595: { name: "weather-partly-cloudy", path: "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z" },
+      E5A8: { name: "white-balance-sunny", path: "M3.55 19.09L4.96 20.5L6.76 18.71L5.34 17.29M12 6C8.69 6 6 8.69 6 12S8.69 18 12 18 18 15.31 18 12C18 8.68 15.31 6 12 6M20 13H23V11H20M17.24 18.71L19.04 20.5L20.45 19.09L18.66 17.29M20.45 5L19.04 3.6L17.24 5.39L18.66 6.81M13 1H11V4H13M6.76 5.39L4.96 3.6L3.55 5L5.34 6.81L6.76 5.39M1 13H4V11H1M13 20H11V23H13" },
+      E95F: { name: "desk-lamp", path: "M10.85,2L9.18,4.5L10.32,5.25L7.14,10C7.1,10 7.05,10 7,10A2,2 0 0,0 5,12C5,12.94 5.66,13.75 6.58,13.95L10.62,20H7V22H17V20H13L8.53,13.28C8.83,12.92 9,12.47 9,12C9,11.7 8.93,11.4 8.8,11.13L12,6.37C11.78,8.05 12.75,9.89 14.45,11L18.89,4.37C17.2,3.24 15.12,3.04 13.65,3.87L10.85,2M18.33,7L16.67,9.5C17.35,9.95 18.29,9.77 18.75,9.08C19.21,8.39 19,7.46 18.33,7Z" },
+      E9A0: { name: "shower", path: "M21,14V15C21,16.91 19.93,18.57 18.35,19.41L19,22H17L16.5,20C16.33,20 16.17,20 16,20H8C7.83,20 7.67,20 7.5,20L7,22H5L5.65,19.41C4.07,18.57 3,16.91 3,15V14H2V12H20V5A1,1 0 0,0 19,4C18.5,4 18.12,4.34 18,4.79C18.63,5.33 19,6.13 19,7H13A3,3 0 0,1 16,4C16.06,4 16.11,4 16.17,4C16.58,2.84 17.69,2 19,2A3,3 0 0,1 22,5V14H21V14M19,14H5V15A3,3 0 0,0 8,18H16A3,3 0 0,0 19,15V14Z" },
+      F11C: { name: "window-shutter", path: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z" },
+      F11E: { name: "window-shutter-open", path: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z" }
+    };
+
+    function appendTextWithOpenHaspIcons(el, text) {
+      el.textContent = "";
+      String(text || "").split(/([\uE000-\uF8FF])/u).forEach(part => {
+        if (!part) return;
+        if (/^[\uE000-\uF8FF]$/u.test(part)) {
+          const code = part.codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
+          const match = openHaspIcons[code];
+          if (!match) {
+            el.append(document.createTextNode(part));
+            return;
+          }
+          const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          icon.setAttribute("viewBox", "0 0 24 24");
+          icon.setAttribute("aria-label", `${code} · ${match.name}`);
+          icon.setAttribute("role", "img");
+          icon.classList.add("mdi-icon");
+          icon.append(path);
+          path.setAttribute("d", match.path);
+          icon.title = `${code} · ${match.name}`;
+          el.append(icon);
+        } else {
+          el.append(document.createTextNode(part));
+        }
+      });
+    }
+
+    function polarPoint(cx, cy, radius, angle) {
+      const radians = (angle - 90) * Math.PI / 180;
+      return {
+        x: cx + radius * Math.cos(radians),
+        y: cy + radius * Math.sin(radians)
+      };
+    }
+
+    function normalizeArcDelta(start, end) {
+      let delta = end - start;
+      while (delta <= 0) delta += 360;
+      return delta;
+    }
+
+    function describeArc(cx, cy, radius, start, end) {
+      const delta = normalizeArcDelta(start, end);
+      const adjustedEnd = start + Math.min(delta, 359.99);
+      const from = polarPoint(cx, cy, radius, start);
+      const to = polarPoint(cx, cy, radius, adjustedEnd);
+      const largeArcFlag = delta > 180 ? 1 : 0;
+      return `M ${from.x} ${from.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${to.x} ${to.y}`;
+    }
+
+    function renderArc(item) {
+      const el = baseElement(item);
+      el.classList.add("lv-arc");
+
+      const width = Number(valueOr(item, "w", 120));
+      const height = Number(valueOr(item, "h", 120));
+      const lineWidth = Number(valueOr(item, "line_width", valueOr(item, "line_width10", 12)));
+      const padTop = Number(valueOr(item, "pad_top", 0));
+      const padRight = Number(valueOr(item, "pad_right", 0));
+      const padBottom = Number(valueOr(item, "pad_bottom", 0));
+      const padLeft = Number(valueOr(item, "pad_left", 0));
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = Math.max(1, Math.min(
+        (width - padLeft - padRight - lineWidth) / 2,
+        (height - padTop - padBottom - lineWidth) / 2
+      ));
+      const start = Number(valueOr(item, "start_angle", 135)) + Number(valueOr(item, "rotation", 0));
+      const end = Number(valueOr(item, "end_angle", 45)) + Number(valueOr(item, "rotation", 0));
+      const sweep = normalizeArcDelta(start, end);
+      const min = Number(valueOr(item, "min", 0));
+      const max = Number(valueOr(item, "max", 100));
+      const val = Number(valueOr(item, "val", min));
+      const progress = max === min ? 0 : Math.max(0, Math.min(1, (val - min) / (max - min)));
+      const valueEnd = start + sweep * progress;
+
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      const track = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const value = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      track.classList.add("lv-arc-track");
+      value.classList.add("lv-arc-value");
+      track.setAttribute("d", describeArc(cx, cy, radius, start, end));
+      value.setAttribute("d", describeArc(cx, cy, radius, start, valueEnd));
+      track.setAttribute("stroke", color(item, "line_color", "rgba(255,255,255,0.14)"));
+      value.setAttribute("stroke", color(item, "line_color10", "#4ec3a3"));
+      track.setAttribute("stroke-width", lineWidth);
+      value.setAttribute("stroke-width", lineWidth);
+      track.setAttribute("opacity", opacityFromLvgl(item.bg_opa, 1));
+      svg.append(track, value);
+      el.append(svg);
+      return el;
+    }
+
+    function baseElement(item) {
+      const el = document.createElement(item.obj === "img" ? "img" : "div");
+      el.classList.add("lv");
+      el.dataset.id = item.id ?? "";
+      el.dataset.uid = item.__uid ?? "";
+      el.title = `id ${item.id ?? "-"} · ${item.obj}`;
+      if (item.__uid === state.selectedUid) el.classList.add("selected");
+
+      const x = valueOr(item, "x", 0);
+      const y = valueOr(item, "y", 0);
+      const size = screenSize();
+      const w = valueOr(item, "w", item.obj === "img" ? size.width : 80);
+      const h = valueOr(item, "h", item.obj === "img" ? size.height : 40);
+      Object.assign(el.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+        width: `${w}px`,
+        height: `${h}px`,
+        fontSize: `${valueOr(item, "text_font", 16)}px`,
+        borderRadius: `${valueOr(item, "radius", item.obj === "btn" ? 6 : 0)}px`,
+        color: color(item, "text_color", "#fff"),
+        opacity: opacityFromLvgl(item.opa, 1)
+      });
+
+      return el;
+    }
+
+    function renderItem(item) {
+      const el = baseElement(item);
+      const bgColor = color(item, "bg_color", null);
+      const bgGradColor = color(item, "bg_grad_color", null);
+
+      if (item.obj === "img") {
+        el.classList.add("lv-img");
+        el.src = localAsset(item.src);
+        el.alt = item.src || "";
+        return el;
+      }
+
+      if (item.obj === "btn") {
+        el.classList.add("lv-btn");
+        if (item.enabled === 0) el.classList.add("disabled");
+        if (bgColor && bgGradColor) el.style.background = `linear-gradient(${bgColor}, ${bgGradColor})`;
+        else if (bgColor) el.style.background = bgColor;
+        el.style.justifyContent = alignFlex(item.align);
+        appendTextWithOpenHaspIcons(el, item.text || "");
+        return el;
+      }
+
+      if (item.obj === "label") {
+        el.classList.add("lv-label");
+        el.style.justifyContent = alignFlex(item.align);
+        appendTextWithOpenHaspIcons(el, item.text || "");
+        fitSingleLineText(el, item);
+        return el;
+      }
+
+      if (item.obj === "obj") {
+        el.classList.add("lv-obj");
+        if (bgColor) el.style.background = bgColor;
+        el.style.opacity = opacityFromLvgl(item.bg_opa, 1);
+        return el;
+      }
+
+      if (item.obj === "slider") {
+        el.classList.add("lv-slider");
+        if ((Number(item.h) || 0) > (Number(item.w) || 0)) el.classList.add("vertical");
+        return el;
+      }
+
+      if (item.obj === "cpicker") {
+        el.classList.add("lv-cpicker");
+        return el;
+      }
+
+      if (item.obj === "bar") {
+        el.classList.add("lv-slider");
+        return el;
+      }
+
+      if (item.obj === "dropdown") {
+        el.classList.add("lv-dropdown");
+        el.textContent = String(item.options || "").split("\n")[0] || "";
+        return el;
+      }
+
+      if (item.obj === "switch") {
+        el.classList.add("lv-switch");
+        return el;
+      }
+
+      if (item.obj === "checkbox") {
+        el.classList.add("lv-btn");
+        el.style.justifyContent = "flex-start";
+        el.textContent = `☐ ${item.text || ""}`.trim();
+        return el;
+      }
+
+      if (item.obj === "led") {
+        el.classList.add("lv-obj");
+        el.style.borderRadius = "50%";
+        el.style.background = color(item, "color", "#00ff00");
+        el.style.boxShadow = `0 0 18px ${color(item, "color", "#00ff00")}`;
+        return el;
+      }
+
+      if (item.obj === "spinner" || item.obj === "gauge" || item.obj === "linemeter") {
+        el.classList.add("lv-arc");
+        return renderArc({ min: 0, max: 100, val: 65, start_angle: 135, end_angle: 45, line_width: 12, line_color10: "#8dd7ff", ...item });
+      }
+
+      if (item.obj === "roller" || item.obj === "btnmatrix" || item.obj === "msgbox" || item.obj === "tabview" || item.obj === "tab") {
+        el.classList.add("lv-dropdown");
+        el.textContent = item.text || String(item.options || item.obj).split("\n")[0] || item.obj;
+        return el;
+      }
+
+      if (item.obj === "qrcode") {
+        el.classList.add("lv-obj");
+        el.style.display = "grid";
+        el.style.placeItems = "center";
+        el.style.background = "#fff";
+        el.style.color = "#000";
+        el.textContent = "QR";
+        return el;
+      }
+
+      if (item.obj === "line") {
+        el.classList.add("lv-obj");
+        el.style.height = `${valueOr(item, "line_width", 3)}px`;
+        el.style.background = color(item, "line_color", "#fff");
+        return el;
+      }
+
+      if (item.obj === "arc") {
+        return renderArc(item);
+      }
+
+      el.classList.add("lv-obj");
+      el.textContent = item.text || item.obj;
+      return el;
+    }
+
+    function render() {
+      els.screen.innerHTML = "";
+      const pageItems = state.pages.get(state.currentPage) || [];
+      const items = [...pageItems, ...state.globals];
+      const settings = pageSettings();
+      els.screen.style.background = settings.bg_color || "#0b0d10";
+      items.forEach(item => {
+        const element = renderItem(item);
+        attachInspector(element, item, item.__page ?? state.currentPage);
+        attachEditorInteractions(element, item);
+        els.screen.append(element);
+      });
+
+      const objectCounts = items.reduce((counts, item) => {
+        counts[item.obj] = (counts[item.obj] || 0) + 1;
+        return counts;
+      }, {});
+      const countText = Object.entries(objectCounts)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([name, count]) => `${name}: ${count}`)
+        .join(" · ");
+
+      els.stats.innerHTML = `
+        <div><strong>${state.filename}</strong></div>
+        <div>Page ${state.currentPage}: ${pageItems.length} objects + ${state.globals.length} globals</div>
+        <div>${countText || "No objects"}</div>
+        <div>${state.sourceLines} lines · ${state.parseErrors.length} parse errors</div>
+      `;
+
+      if (state.parseErrors.length) {
+        const first = state.parseErrors[0];
+        els.stats.innerHTML += `<div class="error">First error: line ${first.line}, ${first.message}</div>`;
+      }
+      els.caption.textContent = `View ${state.currentPage} · ${items.length} rendered elements`;
+      if (!selectedItem()) updatePageEditor();
+    }
+
+    els.fileSelect.addEventListener("change", loadSelectedFile);
+    els.reloadBtn.addEventListener("click", loadSelectedFile);
+    els.screen.addEventListener("click", () => selectItem(null));
+    els.resolutionPreset.addEventListener("change", applyResolutionPreset);
+    els.screenWidth.addEventListener("change", syncCustomResolution);
+    els.screenHeight.addEventListener("change", syncCustomResolution);
+    els.zoom.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--zoom", els.zoom.value);
+    });
+    els.upload.addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      applySource(await file.text(), file.name);
+    });
+    els.editX.addEventListener("change", () => setSelectedNumeric("x", els.editX.value));
+    els.editY.addEventListener("change", () => setSelectedNumeric("y", els.editY.value));
+    els.editW.addEventListener("change", () => setSelectedNumeric("w", els.editW.value));
+    els.editH.addEventListener("change", () => setSelectedNumeric("h", els.editH.value));
+    els.applyJsonBtn.addEventListener("click", applyJsonEditor);
+    els.resetElementBtn.addEventListener("click", () => {
+      updateEditor();
+      render();
+    });
+    els.undoBtn.addEventListener("click", undo);
+    els.redoBtn.addEventListener("click", redo);
+    els.downloadBtn.addEventListener("click", downloadJsonl);
+    els.deleteElementBtn.addEventListener("click", deleteSelectedElement);
+    els.clearSelectionBtn.addEventListener("click", clearSelection);
+    els.backToPageBtn.addEventListener("click", clearSelection);
+    els.applyPageJsonBtn.addEventListener("click", applyPageJson);
+    els.applyBackgroundBtn.addEventListener("click", applyBackground);
+    els.addElementBtn.addEventListener("click", addElement);
+    els.pageUndoBtn.addEventListener("click", undo);
+    els.pageRedoBtn.addEventListener("click", redo);
+    els.pageDownloadBtn.addEventListener("click", downloadJsonl);
+    els.deletePageBtn.addEventListener("click", deleteCurrentPage);
+    els.selectFirstBtn.addEventListener("click", () => {
+      const first = (state.pages.get(state.currentPage) || []).find(isInspectable);
+      if (first) selectItem(first);
+    });
+    window.addEventListener("keydown", event => {
+      const mod = event.ctrlKey || event.metaKey;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        clearSelection();
+        return;
+      }
+      if (!mod) return;
+      const key = event.key.toLowerCase();
+      if (key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        undo();
+      } else if ((key === "z" && event.shiftKey) || key === "y") {
+        event.preventDefault();
+        redo();
+      }
+    });
+
+    document.documentElement.style.setProperty("--zoom", els.zoom.value);
+    applyScreenSize(Number(els.screenWidth.value), Number(els.screenHeight.value));
+    loadSelectedFile();
+  </script>
+</body>
+</html>
