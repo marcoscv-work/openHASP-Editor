@@ -227,7 +227,8 @@
     .phone {
       width: calc((var(--screen-width) + 28px) * var(--zoom, 1));
       height: calc((var(--screen-height) + 28px) * var(--zoom, 1));
-      padding: calc(14px * var(--zoom, 1));
+      display: grid;
+      place-items: center;
       border-radius: calc(28px * var(--zoom, 1));
       background: #050607;
       box-shadow: 0 24px 90px rgba(0, 0, 0, 0.46), inset 0 0 0 1px #2c333b;
@@ -241,7 +242,7 @@
       border-radius: calc(13px * var(--zoom, 1));
       background: #0b0d10;
       transform: scale(var(--zoom, 1));
-      transform-origin: top left;
+      transform-origin: center;
     }
 
     .lv {
