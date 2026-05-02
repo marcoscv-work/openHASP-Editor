@@ -271,6 +271,63 @@
       z-index: 40;
     }
 
+    .resize-box {
+      position: absolute;
+      z-index: 60;
+      pointer-events: none;
+      border: 1px dashed rgba(240, 194, 75, 0.9);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.42);
+    }
+
+    .resize-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border: 1px solid #0b0d10;
+      border-radius: 50%;
+      background: #f0c24b;
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    .resize-handle[data-dir*="n"] {
+      top: -5px;
+    }
+
+    .resize-handle[data-dir*="s"] {
+      bottom: -5px;
+    }
+
+    .resize-handle[data-dir*="w"] {
+      left: -5px;
+    }
+
+    .resize-handle[data-dir*="e"] {
+      right: -5px;
+    }
+
+    .resize-handle[data-dir="n"],
+    .resize-handle[data-dir="s"] {
+      left: calc(50% - 5px);
+      cursor: ns-resize;
+    }
+
+    .resize-handle[data-dir="e"],
+    .resize-handle[data-dir="w"] {
+      top: calc(50% - 5px);
+      cursor: ew-resize;
+    }
+
+    .resize-handle[data-dir="ne"],
+    .resize-handle[data-dir="sw"] {
+      cursor: nesw-resize;
+    }
+
+    .resize-handle[data-dir="nw"],
+    .resize-handle[data-dir="se"] {
+      cursor: nwse-resize;
+    }
+
     .lv-img {
       object-fit: cover;
       pointer-events: none;
@@ -955,6 +1012,16 @@
       return allItems().find(item => item.__uid === state.selectedUid) || null;
     }
 
+    function itemBox(item) {
+      const size = screenSize();
+      return {
+        x: Number(valueOr(item, "x", 0)),
+        y: Number(valueOr(item, "y", 0)),
+        w: Number(valueOr(item, "w", item.obj === "img" ? size.width : 80)),
+        h: Number(valueOr(item, "h", item.obj === "img" ? size.height : 40))
+      };
+    }
+
     function cleanItem(item) {
       const copy = { ...item };
       delete copy.__page;
@@ -1355,6 +1422,106 @@
       updateEditor();
     }
 
+    function resizeBoxFromDrag(drag, event) {
+      const dx = (event.clientX - drag.startX) / drag.zoom;
+      const dy = (event.clientY - drag.startY) / drag.zoom;
+      const fromCenter = event.metaKey;
+      let { x, y, w, h } = drag;
+
+      if (fromCenter) {
+        const centerX = drag.x + drag.w / 2;
+        const centerY = drag.y + drag.h / 2;
+        const horizontalDelta = drag.dir.includes("e") ? dx : drag.dir.includes("w") ? -dx : 0;
+        const verticalDelta = drag.dir.includes("s") ? dy : drag.dir.includes("n") ? -dy : 0;
+        w = Math.max(4, drag.w + horizontalDelta * 2);
+        h = Math.max(4, drag.h + verticalDelta * 2);
+        x = centerX - w / 2;
+        y = centerY - h / 2;
+      } else {
+        if (drag.dir.includes("e")) w = Math.max(4, drag.w + dx);
+        if (drag.dir.includes("s")) h = Math.max(4, drag.h + dy);
+        if (drag.dir.includes("w")) {
+          w = Math.max(4, drag.w - dx);
+          x = drag.x + drag.w - w;
+        }
+        if (drag.dir.includes("n")) {
+          h = Math.max(4, drag.h - dy);
+          y = drag.y + drag.h - h;
+        }
+      }
+
+      return {
+        x: Math.round(x),
+        y: Math.round(y),
+        w: Math.round(w),
+        h: Math.round(h)
+      };
+    }
+
+    function applyItemBox(item, box) {
+      item.x = box.x;
+      item.y = box.y;
+      item.w = box.w;
+      item.h = box.h;
+    }
+
+    function paintLiveBox(uid, box) {
+      const target = els.screen.querySelector(`.lv[data-uid="${uid}"]`);
+      const overlay = els.screen.querySelector(".resize-box");
+      [target, overlay].filter(Boolean).forEach(element => {
+        element.style.left = `${box.x}px`;
+        element.style.top = `${box.y}px`;
+        element.style.width = `${box.w}px`;
+        element.style.height = `${box.h}px`;
+      });
+    }
+
+    function startResize(event, item, dir) {
+      if (event.button !== 0) return;
+      const handle = event.currentTarget;
+      event.preventDefault();
+      event.stopPropagation();
+      selectItem(item, false);
+      const box = itemBox(item);
+      const drag = {
+        ...box,
+        dir,
+        uid: item.__uid,
+        startX: event.clientX,
+        startY: event.clientY,
+        zoom: Number(els.zoom.value) || 1,
+        moved: false,
+        historySaved: false
+      };
+      handle.setPointerCapture(event.pointerId);
+
+      const onMove = moveEvent => {
+        const next = resizeBoxFromDrag(drag, moveEvent);
+        if (Math.abs(next.x - drag.x) + Math.abs(next.y - drag.y) + Math.abs(next.w - drag.w) + Math.abs(next.h - drag.h) > 1) {
+          drag.moved = true;
+        }
+        if (drag.moved && !drag.historySaved) {
+          pushUndoState();
+          drag.historySaved = true;
+        }
+        applyItemBox(item, next);
+        paintLiveBox(drag.uid, next);
+        updateEditor();
+      };
+
+      const onEnd = endEvent => {
+        if (handle.hasPointerCapture(endEvent.pointerId)) handle.releasePointerCapture(endEvent.pointerId);
+        handle.removeEventListener("pointermove", onMove);
+        handle.removeEventListener("pointerup", onEnd);
+        handle.removeEventListener("pointercancel", onEnd);
+        if (drag.moved) render();
+      };
+
+      handle.addEventListener("pointermove", onMove);
+      handle.addEventListener("pointerup", onEnd);
+      handle.addEventListener("pointercancel", onEnd);
+    }
+
     function setSelectedNumeric(key, value) {
       const item = selectedItem();
       if (!item) return;
@@ -1716,6 +1883,31 @@
       return el;
     }
 
+    function renderResizeBox() {
+      const item = selectedItem();
+      if (!item) return;
+      const box = itemBox(item);
+      const overlay = document.createElement("div");
+      overlay.className = "resize-box";
+      Object.assign(overlay.style, {
+        left: `${box.x}px`,
+        top: `${box.y}px`,
+        width: `${box.w}px`,
+        height: `${box.h}px`
+      });
+
+      ["nw", "n", "ne", "e", "se", "s", "sw", "w"].forEach(dir => {
+        const handle = document.createElement("div");
+        handle.className = "resize-handle";
+        handle.dataset.dir = dir;
+        handle.title = "Drag to resize. Hold Command to resize from center.";
+        handle.addEventListener("pointerdown", event => startResize(event, item, dir));
+        overlay.append(handle);
+      });
+
+      els.screen.append(overlay);
+    }
+
     function render() {
       els.screen.innerHTML = "";
       const pageItems = state.pages.get(state.currentPage) || [];
@@ -1728,6 +1920,7 @@
         attachEditorInteractions(element, item);
         els.screen.append(element);
       });
+      renderResizeBox();
 
       const objectCounts = items.reduce((counts, item) => {
         counts[item.obj] = (counts[item.obj] || 0) + 1;
