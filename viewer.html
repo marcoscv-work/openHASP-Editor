@@ -169,6 +169,21 @@
       gap: 8px;
     }
 
+    .page-transfer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: end;
+      margin-top: 4px;
+      margin-bottom: 2px;
+    }
+
+    .page-transfer button {
+      min-height: 38px;
+      padding: 8px 12px;
+      white-space: nowrap;
+    }
+
     button {
       border: 1px solid var(--border);
       border-radius: 7px;
@@ -702,16 +717,13 @@
       <div id="editorFields" hidden>
         <div class="stats" id="selectionSummary"></div>
 
-        <div class="row">
+        <div class="page-transfer">
           <label>
             Target Page
             <select id="targetPageSelect"></select>
           </label>
           <button id="copyToPageBtn">Copy</button>
-        </div>
-
-        <div class="editor-actions">
-          <button id="moveToPageBtn">Move to Page</button>
+          <button id="moveToPageBtn">Move</button>
         </div>
 
         <div class="quad">
