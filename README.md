@@ -2,7 +2,7 @@
 
 Static browser viewer and editor for openHASP JSONL page files.
 
-It draws an LVGL-like preview, lets you inspect object IDs and MQTT topic hints, edit page and element properties, drag objects, add or delete pages and elements, undo accidental changes, auto-fit the screen preview, and export a modified JSONL file.
+It draws an LVGL-like preview, lets you inspect object IDs and MQTT topic hints, edit page and element properties, choose openHASP icons with a searchable picker, drag objects, add or delete pages and elements, undo accidental changes, auto-fit the screen preview, and export a modified JSONL file.
 
 ## Start Locally
 

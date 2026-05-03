@@ -145,6 +145,116 @@
       font-family: "Material Design Icons", Inter, ui-sans-serif, system-ui, sans-serif;
     }
 
+    #editIcon {
+      display: none;
+    }
+
+    .icon-picker {
+      position: relative;
+      display: grid;
+      gap: 8px;
+    }
+
+    .icon-picker-trigger {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      text-align: left;
+    }
+
+    .icon-picker-trigger:disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+
+    .icon-picker-trigger::after {
+      content: "▾";
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .icon-picker-trigger img,
+    .icon-picker-trigger svg {
+      width: 21px;
+      height: 21px;
+      color: var(--text);
+      fill: currentColor;
+    }
+
+    .icon-picker-trigger span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .icon-picker-trigger * {
+      pointer-events: none;
+    }
+
+    .icon-popover {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 90;
+      display: grid;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #151a20;
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
+    }
+
+    .icon-popover[hidden] {
+      display: none;
+    }
+
+    .icon-options {
+      display: grid;
+      gap: 6px;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .icon-option {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      align-items: center;
+      min-height: 34px;
+      width: 100%;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .icon-option * {
+      pointer-events: none;
+    }
+
+    .icon-option.active {
+      border-color: var(--accent);
+      background: rgba(78, 195, 163, 0.14);
+    }
+
+    .icon-option img,
+    .icon-option svg {
+      width: 21px;
+      height: 21px;
+      color: var(--text);
+      fill: currentColor;
+    }
+
+    .icon-option span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     textarea {
       min-height: 220px;
       resize: vertical;
@@ -463,6 +573,10 @@
       fill: currentColor;
       line-height: 1;
       vertical-align: -0.14em;
+    }
+
+    img.mdi-icon {
+      object-fit: contain;
     }
 
     .mdi-glyph {
@@ -985,6 +1099,13 @@
         <label>
           Icon
           <select id="editIcon"></select>
+          <div class="icon-picker">
+            <button id="iconPickerBtn" class="icon-picker-trigger" type="button" title="Open icon picker"></button>
+            <div id="iconPopover" class="icon-popover" hidden>
+              <input id="iconSearch" type="text" placeholder="Search icon or code">
+              <div id="iconOptions" class="icon-options"></div>
+            </div>
+          </div>
         </label>
 
         <label>
@@ -1206,6 +1327,10 @@
       editH: document.querySelector("#editH"),
       editText: document.querySelector("#editText"),
       editIcon: document.querySelector("#editIcon"),
+      iconPickerBtn: document.querySelector("#iconPickerBtn"),
+      iconPopover: document.querySelector("#iconPopover"),
+      iconSearch: document.querySelector("#iconSearch"),
+      iconOptions: document.querySelector("#iconOptions"),
       jsonEditor: document.querySelector("#jsonEditor"),
       editorError: document.querySelector("#editorError"),
       applyJsonBtn: document.querySelector("#applyJsonBtn"),
@@ -1745,7 +1870,7 @@
       `;
       updateTargetPageOptions();
       const isMultiSelection = selectedCount > 1;
-      [els.editX, els.editY, els.editW, els.editH, els.editText, els.editIcon, els.jsonEditor, els.applyJsonBtn].forEach(control => {
+      [els.editX, els.editY, els.editW, els.editH, els.editText, els.editIcon, els.iconPickerBtn, els.jsonEditor, els.applyJsonBtn].forEach(control => {
         control.disabled = isMultiSelection;
       });
       if (isMultiSelection) {
@@ -1755,6 +1880,8 @@
         els.editH.value = "";
         els.editText.value = "";
         els.editIcon.value = "";
+        closeIconPopover();
+        updateIconPickerButton();
         els.jsonEditor.value = `${selectedCount} elements selected.\n\nRaw JSON editing is disabled during multiselection. Select a single element to edit its JSON.`;
       } else {
         els.editX.value = valueOr(item, "x", 0);
@@ -1763,6 +1890,7 @@
         els.editH.value = valueOr(item, "h", "");
         els.editText.value = valueOr(item, "text", "");
         els.editIcon.value = iconCodeFromText(item.text) || "";
+        updateIconPicker();
         els.jsonEditor.value = JSON.stringify(cleanItem(item), null, 2);
       }
     }
@@ -3101,6 +3229,78 @@
           .map(([code, name]) => `<option value="${code}">${String.fromCodePoint(parseInt(code, 16))} ${code} · ${escapeHtml(name)}</option>`)
       ];
       els.editIcon.innerHTML = options.join("");
+      renderIconOptions();
+    }
+
+    function iconApiUrl(name, color = "eef2f4") {
+      return `https://api.iconify.design/mdi/${encodeURIComponent(name)}.svg?color=%23${color}`;
+    }
+
+    function iconMarkup(code) {
+      if (!code) return `<span></span>`;
+      const pathInfo = openHaspIconPaths[code];
+      if (pathInfo) {
+        return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${pathInfo.path}"></path></svg>`;
+      }
+      const name = openHaspIconNames[code];
+      return `<img alt="" src="${iconApiUrl(name)}">`;
+    }
+
+    function updateIconPickerButton() {
+      const code = els.editIcon.value;
+      const name = openHaspIconNames[code];
+      els.iconPickerBtn.innerHTML = `${iconMarkup(code)}<span>${code ? `${code} · ${escapeHtml(name)}` : "No icon"}</span>`;
+    }
+
+    function renderIconOptions() {
+      const query = (els.iconSearch?.value || "").trim().toLowerCase();
+      const entries = Object.entries(openHaspIconNames)
+        .sort(([, a], [, b]) => a.localeCompare(b))
+        .filter(([code, name]) => !query || code.toLowerCase().includes(query) || name.toLowerCase().includes(query));
+      const active = els.editIcon.value;
+      els.iconOptions.innerHTML = [
+        `<button type="button" class="icon-option${active ? "" : " active"}" data-code="">
+          <span></span>
+          <span>No icon</span>
+        </button>`,
+        ...entries.map(([code, name]) => `
+          <button type="button" class="icon-option${code === active ? " active" : ""}" data-code="${code}" title="${code} · ${escapeHtml(name)}">
+            ${iconMarkup(code)}
+            <span>${code} · ${escapeHtml(name)}</span>
+          </button>
+        `)
+      ].join("");
+      updateIconPickerButton();
+    }
+
+    function updateIconPicker() {
+      if (!els.iconOptions) return;
+      [...els.iconOptions.querySelectorAll(".icon-option")].forEach(button => {
+        button.classList.toggle("active", button.dataset.code === els.editIcon.value);
+      });
+      updateIconPickerButton();
+    }
+
+    function openIconPopover() {
+      if (els.editIcon.disabled) return;
+      els.iconPopover.hidden = false;
+      renderIconOptions();
+      requestAnimationFrame(() => els.iconSearch.focus());
+    }
+
+    function closeIconPopover() {
+      els.iconPopover.hidden = true;
+    }
+
+    function pickIconFromEvent(event) {
+      const option = event.target.closest(".icon-option");
+      if (!option) return;
+      event.preventDefault();
+      event.stopPropagation();
+      els.editIcon.value = option.dataset.code || "";
+      setSelectedIcon(els.editIcon.value);
+      closeIconPopover();
+      els.iconPickerBtn.focus();
     }
 
     function appendTextWithOpenHaspIcons(el, text) {
@@ -3111,11 +3311,21 @@
           const code = part.codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
           const match = openHaspIconPaths[code];
           if (!match) {
-            const fallback = document.createElement("span");
-            fallback.className = "mdi-glyph";
-            fallback.textContent = part;
-            fallback.title = `${code} · ${openHaspIconNames[code] || "custom icon"}`;
-            el.append(fallback);
+            const name = openHaspIconNames[code];
+            if (name) {
+              const image = document.createElement("img");
+              image.className = "mdi-icon";
+              image.src = iconApiUrl(name, "ffffff");
+              image.alt = "";
+              image.title = `${code} · ${name}`;
+              el.append(image);
+            } else {
+              const fallback = document.createElement("span");
+              fallback.className = "mdi-glyph";
+              fallback.textContent = part;
+              fallback.title = `${code} · custom icon`;
+              el.append(fallback);
+            }
             return;
           }
           const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -3525,6 +3735,38 @@
     els.editH.addEventListener("change", () => setSelectedNumeric("h", els.editH.value));
     els.editText.addEventListener("change", () => setSelectedText(els.editText.value));
     els.editIcon.addEventListener("change", () => setSelectedIcon(els.editIcon.value));
+    els.iconPickerBtn.addEventListener("click", () => {
+      if (els.iconPopover.hidden) openIconPopover();
+      else closeIconPopover();
+    });
+    els.iconSearch.addEventListener("input", renderIconOptions);
+    els.iconOptions.addEventListener("pointerdown", pickIconFromEvent, true);
+    els.iconOptions.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+    els.iconOptions.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        pickIconFromEvent(event);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeIconPopover();
+        els.iconPickerBtn.focus();
+      }
+    });
+    document.addEventListener("click", event => {
+      if (els.iconPopover.hidden) return;
+      if (!event.target.closest(".icon-picker")) closeIconPopover();
+    });
+    els.iconSearch.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeIconPopover();
+        els.iconPickerBtn.focus();
+      }
+    });
     els.applyJsonBtn.addEventListener("click", applyJsonEditor);
     els.resetElementBtn.addEventListener("click", () => {
       updateEditor();
@@ -3576,6 +3818,11 @@
       const mod = event.ctrlKey || event.metaKey;
       if (event.key === "Escape") {
         event.preventDefault();
+        if (!els.iconPopover.hidden) {
+          closeIconPopover();
+          els.iconPickerBtn.focus();
+          return;
+        }
         clearSelection();
         return;
       }
