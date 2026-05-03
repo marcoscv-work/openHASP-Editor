@@ -35,6 +35,13 @@
     "source": "https://www.openhasp.com/0.7.0/hardware/sunton/esp32-4827s043/"
   },
   {
+    "id": "272x480",
+    "width": 272,
+    "height": 480,
+    "label": "272x480 - Portrait 4.3 inch wide",
+    "source": "https://www.openhasp.com/0.7.0/hardware/sunton/esp32-4827s043/"
+  },
+  {
     "id": "480x320",
     "width": 480,
     "height": 320,
@@ -53,6 +60,13 @@
     "width": 800,
     "height": 480,
     "label": "800x480 - 5/7 inch wide",
+    "source": "https://www.openhasp.com/0.7.0/hardware/sunton/esp32-8048s0xx/"
+  },
+  {
+    "id": "480x800",
+    "width": 480,
+    "height": 800,
+    "label": "480x800 - Portrait 5/7 inch wide",
     "source": "https://www.openhasp.com/0.7.0/hardware/sunton/esp32-8048s0xx/"
   }
 ]
