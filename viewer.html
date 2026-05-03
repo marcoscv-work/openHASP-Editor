@@ -754,7 +754,6 @@
           </button>
           <button id="pageDownloadBtn">Download JSONL</button>
           <button id="deletePageBtn" class="danger">Delete Page</button>
-          <button id="selectFirstBtn">Select First</button>
         </div>
       </div>
 
@@ -863,7 +862,6 @@
       pageRedoBtn: document.querySelector("#pageRedoBtn"),
       pageDownloadBtn: document.querySelector("#pageDownloadBtn"),
       deletePageBtn: document.querySelector("#deletePageBtn"),
-      selectFirstBtn: document.querySelector("#selectFirstBtn"),
       editorFields: document.querySelector("#editorFields"),
       selectionSummary: document.querySelector("#selectionSummary"),
       targetPageSelect: document.querySelector("#targetPageSelect"),
@@ -2211,10 +2209,6 @@
     els.pageRedoBtn.addEventListener("click", redo);
     els.pageDownloadBtn.addEventListener("click", downloadJsonl);
     els.deletePageBtn.addEventListener("click", deleteCurrentPage);
-    els.selectFirstBtn.addEventListener("click", () => {
-      const first = (state.pages.get(state.currentPage) || []).find(isInspectable);
-      if (first) selectItem(first);
-    });
     window.addEventListener("keydown", event => {
       if ((event.key === "Delete" || event.key === "Backspace") && !isTypingTarget(event.target) && selectedPageItems().length) {
         event.preventDefault();
