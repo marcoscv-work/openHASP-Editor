@@ -446,6 +446,7 @@
       display: inline-block;
       width: 1em;
       height: 1em;
+      flex: 0 0 auto;
       fill: currentColor;
       line-height: 1;
       vertical-align: -0.14em;
@@ -958,6 +959,16 @@
         </div>
 
         <label>
+          Text
+          <input id="editText" type="text" placeholder="Button text or label text">
+        </label>
+
+        <label>
+          Icon
+          <select id="editIcon"></select>
+        </label>
+
+        <label>
           Raw Element JSON
           <textarea id="jsonEditor" spellcheck="false"></textarea>
         </label>
@@ -1174,6 +1185,8 @@
       editY: document.querySelector("#editY"),
       editW: document.querySelector("#editW"),
       editH: document.querySelector("#editH"),
+      editText: document.querySelector("#editText"),
+      editIcon: document.querySelector("#editIcon"),
       jsonEditor: document.querySelector("#jsonEditor"),
       editorError: document.querySelector("#editorError"),
       applyJsonBtn: document.querySelector("#applyJsonBtn"),
@@ -1713,7 +1726,7 @@
       `;
       updateTargetPageOptions();
       const isMultiSelection = selectedCount > 1;
-      [els.editX, els.editY, els.editW, els.editH, els.jsonEditor, els.applyJsonBtn].forEach(control => {
+      [els.editX, els.editY, els.editW, els.editH, els.editText, els.editIcon, els.jsonEditor, els.applyJsonBtn].forEach(control => {
         control.disabled = isMultiSelection;
       });
       if (isMultiSelection) {
@@ -1721,12 +1734,16 @@
         els.editY.value = "";
         els.editW.value = "";
         els.editH.value = "";
+        els.editText.value = "";
+        els.editIcon.value = "";
         els.jsonEditor.value = `${selectedCount} elements selected.\n\nRaw JSON editing is disabled during multiselection. Select a single element to edit its JSON.`;
       } else {
         els.editX.value = valueOr(item, "x", 0);
         els.editY.value = valueOr(item, "y", 0);
         els.editW.value = valueOr(item, "w", "");
         els.editH.value = valueOr(item, "h", "");
+        els.editText.value = valueOr(item, "text", "");
+        els.editIcon.value = iconCodeFromText(item.text) || "";
         els.jsonEditor.value = JSON.stringify(cleanItem(item), null, 2);
       }
     }
@@ -2142,6 +2159,31 @@
       } else {
         item[key] = numeric;
       }
+      updateEditor();
+      render();
+    }
+
+    function setSelectedText(value) {
+      const item = selectedItem();
+      if (!item || state.selectedUids.length > 1) return;
+      pushUndoState();
+      if (value === "") delete item.text;
+      else item.text = value;
+      updateEditor();
+      render();
+    }
+
+    function setSelectedIcon(code) {
+      const item = selectedItem();
+      if (!item || state.selectedUids.length > 1) return;
+      pushUndoState();
+      const text = String(item.text || "");
+      const icon = code ? String.fromCodePoint(parseInt(code, 16)) : "";
+      const next = text.match(/[\uE000-\uF8FF]/u)
+        ? text.replace(/[\uE000-\uF8FF]/u, icon).replace(/^ +/, "")
+        : `${icon}${text ? ` ${text}` : ""}`;
+      if (next) item.text = next;
+      else delete item.text;
       updateEditor();
       render();
     }
@@ -2878,6 +2920,21 @@
       F11E: { name: "window-shutter-open", path: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z" }
     };
 
+    function iconCodeFromText(text) {
+      const match = String(text || "").match(/[\uE000-\uF8FF]/u);
+      return match ? match[0].codePointAt(0).toString(16).toUpperCase().padStart(4, "0") : "";
+    }
+
+    function populateIconSelect() {
+      const options = [
+        `<option value="">No icon</option>`,
+        ...Object.entries(openHaspIcons)
+          .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+          .map(([code, icon]) => `<option value="${code}">${code} · ${escapeHtml(icon.name)}</option>`)
+      ];
+      els.editIcon.innerHTML = options.join("");
+    }
+
     function appendTextWithOpenHaspIcons(el, text) {
       el.textContent = "";
       String(text || "").split(/([\uE000-\uF8FF])/u).forEach(part => {
@@ -3294,6 +3351,8 @@
     els.editY.addEventListener("change", () => setSelectedNumeric("y", els.editY.value));
     els.editW.addEventListener("change", () => setSelectedNumeric("w", els.editW.value));
     els.editH.addEventListener("change", () => setSelectedNumeric("h", els.editH.value));
+    els.editText.addEventListener("change", () => setSelectedText(els.editText.value));
+    els.editIcon.addEventListener("change", () => setSelectedIcon(els.editIcon.value));
     els.applyJsonBtn.addEventListener("click", applyJsonEditor);
     els.resetElementBtn.addEventListener("click", () => {
       updateEditor();
@@ -3374,6 +3433,7 @@
     const zoomObserver = new ResizeObserver(updateZoom);
     zoomObserver.observe(els.main);
     window.addEventListener("resize", updateZoom);
+    populateIconSelect();
     updateZoom();
     applyScreenSize(Number(els.screenWidth.value), Number(els.screenHeight.value));
     loadSelectedFile();
