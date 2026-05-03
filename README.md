@@ -2,7 +2,7 @@
 
 Static browser viewer and editor for openHASP JSONL page files.
 
-It draws an LVGL-like preview, lets you inspect object IDs and MQTT topic hints, edit page and element properties, drag objects, add or delete pages and elements, undo accidental changes, and export a modified JSONL file.
+It draws an LVGL-like preview, lets you inspect object IDs and MQTT topic hints, edit page and element properties, drag objects, add or delete pages and elements, undo accidental changes, auto-fit the screen preview, and export a modified JSONL file.
 
 ## Start Locally
 
@@ -29,6 +29,15 @@ The editor can also be served as a static site. `index.html` redirects to `viewe
 This repository includes a GitHub Actions workflow at `.github/workflows/pages.yml`.
 
 After pushing to `main`, enable GitHub Pages in the repository settings with GitHub Actions as the source. Future pushes to `main` will deploy the static editor automatically.
+
+## Home Assistant Export
+
+The export modal uses one shared bindings map and can generate:
+
+- `openHASP HACS Config`: an `openhasp:` YAML configuration with object `properties` and `event` handlers for the openHASP Home Assistant custom component.
+- `MQTT Automations`: plain Home Assistant automations that publish/consume openHASP MQTT topics directly.
+
+Use `Detect Bindings` to scan the current JSONL pages and create a starter map. The visual Binding Mapper can edit common `object -> entity/service` mappings without leaving the editor, while the raw JSON remains available for advanced service data.
 
 ## Files
 

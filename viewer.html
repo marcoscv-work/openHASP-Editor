@@ -647,6 +647,70 @@
       gap: 12px;
     }
 
+    .export-format-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 260px) 1fr;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .binding-panel {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(36, 42, 49, 0.38);
+    }
+
+    .binding-panel summary {
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .binding-toolbar {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .binding-table {
+      display: grid;
+      gap: 8px;
+      max-height: 340px;
+      overflow: auto;
+    }
+
+    .binding-row {
+      display: grid;
+      grid-template-columns: 74px minmax(130px, 160px) minmax(170px, 1fr) minmax(170px, 1fr);
+      gap: 8px;
+      align-items: end;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(57, 66, 77, 0.65);
+    }
+
+    .binding-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .binding-address {
+      display: grid;
+      gap: 4px;
+      align-self: center;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .binding-address span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      overflow-wrap: anywhere;
+    }
+
     .modal textarea {
       min-height: 180px;
     }
@@ -680,6 +744,11 @@
       }
 
       .modal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .export-format-row,
+      .binding-row {
         grid-template-columns: 1fr;
       }
     }
@@ -750,7 +819,11 @@
 
       <label>
         Zoom
-        <input id="zoom" type="range" min="0.55" max="1.45" value="1" step="0.05">
+        <input id="zoom" type="range" min="0.35" max="2.5" value="1" step="0.05">
+      </label>
+      <label style="display:flex; grid-template-columns:none; align-items:center; gap:10px; text-transform:none; font-size:13px;">
+        <input id="autoZoom" type="checkbox" checked style="width:auto;">
+        Auto-adjust screen zoom
       </label>
 
       <div>
@@ -759,7 +832,7 @@
       </div>
 
       <div id="stats" class="stats"></div>
-      <button id="openExportBtn">Export HA Automations</button>
+      <button id="openExportBtn" title="Open the Home Assistant export modal for HACS config or plain MQTT automations.">Export Home Assistant</button>
     </aside>
 
     <main>
@@ -838,8 +911,8 @@
         <div id="pageError" class="error"></div>
 
         <div class="editor-actions">
-          <button id="applyPageJsonBtn">Apply Page</button>
-          <button id="applyBackgroundBtn">Apply Background</button>
+          <button id="applyPageJsonBtn" title="Apply the raw page JSON to the current page settings. Invalid JSON will be rejected.">Apply Page</button>
+          <button id="applyBackgroundBtn" title="Apply the background color, image, and page click settings to the current page.">Apply Background</button>
           <button id="pageUndoBtn" class="button-icon" title="Undo">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8C9.9 8 7.6 9.1 6 10.8V7H4V14H11V12H7.3C8.5 10.8 10.3 10 12.5 10C15.7 10 18.4 12.1 19.3 15L21.2 14.4C20 10.7 16.6 8 12.5 8Z"></path></svg>
             <span>Undo</span>
@@ -848,8 +921,8 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.5 8C14.1 8 16.4 9.1 18 10.8V7H20V14H13V12H16.7C15.5 10.8 13.7 10 11.5 10C8.3 10 5.6 12.1 4.7 15L2.8 14.4C4 10.7 7.4 8 11.5 8Z"></path></svg>
             <span>Redo</span>
           </button>
-          <button id="pageDownloadBtn">Download JSONL</button>
-          <button id="deletePageBtn" class="danger">Delete Page</button>
+          <button id="pageDownloadBtn" title="Download the edited screen as a JSONL variation file.">Download JSONL</button>
+          <button id="deletePageBtn" class="danger" title="Delete the current page after confirmation.">Delete Page</button>
         </div>
       </div>
 
@@ -861,8 +934,8 @@
             Target Page
             <select id="targetPageSelect"></select>
           </label>
-          <button id="copyToPageBtn">Copy</button>
-          <button id="moveToPageBtn">Move</button>
+          <button id="copyToPageBtn" title="Copy the selected element or multiselection to the chosen page.">Copy</button>
+          <button id="moveToPageBtn" title="Move the selected element or multiselection to the chosen page.">Move</button>
         </div>
 
         <div class="quad">
@@ -892,8 +965,8 @@
         <div id="editorError" class="error"></div>
 
         <div class="editor-actions">
-          <button id="applyJsonBtn">Apply JSON</button>
-          <button id="resetElementBtn">Reset View</button>
+          <button id="applyJsonBtn" title="Apply the raw element JSON to the selected object. Invalid JSON will be rejected.">Apply JSON</button>
+          <button id="resetElementBtn" title="Reload the editor fields from the selected element without changing the layout.">Reset View</button>
           <button id="undoBtn" class="button-icon" title="Undo">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8C9.9 8 7.6 9.1 6 10.8V7H4V14H11V12H7.3C8.5 10.8 10.3 10 12.5 10C15.7 10 18.4 12.1 19.3 15L21.2 14.4C20 10.7 16.6 8 12.5 8Z"></path></svg>
             <span>Undo</span>
@@ -902,8 +975,8 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.5 8C14.1 8 16.4 9.1 18 10.8V7H20V14H13V12H16.7C15.5 10.8 13.7 10 11.5 10C8.3 10 5.6 12.1 4.7 15L2.8 14.4C4 10.7 7.4 8 11.5 8Z"></path></svg>
             <span>Redo</span>
           </button>
-          <button id="downloadBtn">Download JSONL</button>
-          <button id="deleteElementBtn" class="danger">Delete Element</button>
+          <button id="downloadBtn" title="Download the edited screen as a JSONL variation file.">Download JSONL</button>
+          <button id="deleteElementBtn" class="danger" title="Delete the selected element or multiselection. You can also press Delete or Backspace.">Delete Element</button>
           <button id="clearSelectionBtn">Page Editor</button>
         </div>
       </div>
@@ -915,9 +988,20 @@
       <div class="modal-header">
         <div>
           <h1 id="exportTitle">Export</h1>
-          <p class="muted">Generate Home Assistant automations from openHASP object bindings.</p>
+          <p class="muted">Generate Home Assistant YAML from one shared openHASP binding map.</p>
         </div>
         <button id="closeExportBtn" class="icon-button" title="Close" aria-label="Close">×</button>
+      </div>
+
+      <div class="export-format-row">
+        <label>
+          Export Format
+          <select id="exportFormat">
+            <option value="hacs">openHASP HACS Config</option>
+            <option value="automations">MQTT Automations</option>
+          </select>
+        </label>
+        <p id="exportFormatHelp" class="muted"></p>
       </div>
 
       <div class="modal-grid">
@@ -960,13 +1044,66 @@
         <textarea id="exportBindings" spellcheck="false"></textarea>
       </label>
 
+      <details class="binding-panel" open>
+        <summary>Binding Mapper</summary>
+        <p class="muted">Map each openHASP object to a Home Assistant entity or service. Complex service data can still be edited in the JSON above.</p>
+        <div class="binding-toolbar">
+          <button id="refreshMapperBtn" title="Rebuild the visual mapper from the current Bindings JSON without changing the screen layout.">Refresh Mapper</button>
+        </div>
+        <div id="bindingMapper" class="binding-table"></div>
+      </details>
+
+      <label style="display:flex; grid-template-columns:none; align-items:center; gap:10px; text-transform:none; font-size:13px;">
+        <input id="exportBacklightEnabled" type="checkbox" style="width:auto;">
+        Include backlight and anti-burn automations
+      </label>
+
+      <div class="modal-grid">
+        <label>
+          Backlight Command
+          <input id="exportBacklightCommand" type="text" value="backlight">
+        </label>
+        <label>
+          Day Brightness
+          <input id="exportBacklightDay" type="number" value="255" min="0" max="255">
+        </label>
+        <label>
+          Night Brightness
+          <input id="exportBacklightNight" type="number" value="40" min="0" max="255">
+        </label>
+        <label>
+          Night Start
+          <input id="exportNightStart" type="text" value="23:00:00">
+        </label>
+        <label>
+          Night End
+          <input id="exportNightEnd" type="text" value="07:00:00">
+        </label>
+        <label>
+          Anti-Burn Interval
+          <input id="exportAntiburnInterval" type="text" value="/10">
+        </label>
+        <label>
+          Anti-Burn Pages
+          <input id="exportAntiburnPages" type="text" value="1,2">
+        </label>
+        <label>
+          Restore Page
+          <input id="exportRestorePage" type="number" value="1" min="1">
+        </label>
+        <label>
+          Motion Entity
+          <input id="exportMotionEntity" type="text" placeholder="binary_sensor.motion optional">
+        </label>
+      </div>
+
       <div id="exportError" class="error"></div>
 
       <div class="editor-actions">
-        <button id="detectBindingsBtn">Detect Bindings</button>
-        <button id="loadExampleBindingsBtn">Load Example</button>
-        <button id="generateHaYamlBtn">Generate YAML</button>
-        <button id="downloadHaYamlBtn">Download YAML</button>
+        <button id="detectBindingsBtn" title="Scan the current pages and create a starter binding map for objects that can trigger actions or display Home Assistant state.">Detect Bindings</button>
+        <button id="loadExampleBindingsBtn" title="Replace the current binding map with a generic example configuration.">Load Example</button>
+        <button id="generateHaYamlBtn" title="Generate the selected Home Assistant YAML format from the binding map and export settings.">Generate YAML</button>
+        <button id="downloadHaYamlBtn" title="Download the generated YAML using the configured output filename.">Download YAML</button>
       </div>
 
       <label>
@@ -1003,7 +1140,9 @@
       reloadBtn: document.querySelector("#reloadBtn"),
       upload: document.querySelector("#upload"),
       zoom: document.querySelector("#zoom"),
+      autoZoom: document.querySelector("#autoZoom"),
       openExportBtn: document.querySelector("#openExportBtn"),
+      main: document.querySelector("main"),
       tabs: document.querySelector("#tabs"),
       stats: document.querySelector("#stats"),
       screen: document.querySelector("#screen"),
@@ -1047,6 +1186,8 @@
       clearSelectionBtn: document.querySelector("#clearSelectionBtn"),
       exportModal: document.querySelector("#exportModal"),
       closeExportBtn: document.querySelector("#closeExportBtn"),
+      exportFormat: document.querySelector("#exportFormat"),
+      exportFormatHelp: document.querySelector("#exportFormatHelp"),
       exportBrokerHost: document.querySelector("#exportBrokerHost"),
       exportBrokerPort: document.querySelector("#exportBrokerPort"),
       exportBrokerUsername: document.querySelector("#exportBrokerUsername"),
@@ -1056,9 +1197,21 @@
       exportAutomationPrefix: document.querySelector("#exportAutomationPrefix"),
       exportFilename: document.querySelector("#exportFilename"),
       exportBindings: document.querySelector("#exportBindings"),
+      exportBacklightEnabled: document.querySelector("#exportBacklightEnabled"),
+      exportBacklightCommand: document.querySelector("#exportBacklightCommand"),
+      exportBacklightDay: document.querySelector("#exportBacklightDay"),
+      exportBacklightNight: document.querySelector("#exportBacklightNight"),
+      exportNightStart: document.querySelector("#exportNightStart"),
+      exportNightEnd: document.querySelector("#exportNightEnd"),
+      exportAntiburnInterval: document.querySelector("#exportAntiburnInterval"),
+      exportAntiburnPages: document.querySelector("#exportAntiburnPages"),
+      exportRestorePage: document.querySelector("#exportRestorePage"),
+      exportMotionEntity: document.querySelector("#exportMotionEntity"),
       exportError: document.querySelector("#exportError"),
       detectBindingsBtn: document.querySelector("#detectBindingsBtn"),
       loadExampleBindingsBtn: document.querySelector("#loadExampleBindingsBtn"),
+      refreshMapperBtn: document.querySelector("#refreshMapperBtn"),
+      bindingMapper: document.querySelector("#bindingMapper"),
       generateHaYamlBtn: document.querySelector("#generateHaYamlBtn"),
       downloadHaYamlBtn: document.querySelector("#downloadHaYamlBtn"),
       exportOutput: document.querySelector("#exportOutput")
@@ -1223,11 +1376,37 @@
       };
     }
 
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function currentZoom() {
+      return Number(getComputedStyle(document.documentElement).getPropertyValue("--zoom")) || Number(els.zoom.value) || 1;
+    }
+
+    function autoZoomValue() {
+      const { width, height } = screenSize();
+      const rect = els.main.getBoundingClientRect();
+      const availableWidth = Math.max(160, rect.width - 56);
+      const availableHeight = Math.max(160, rect.height - 98);
+      const phoneWidth = width + 28;
+      const phoneHeight = height + 28;
+      return clamp(Math.min(availableWidth / phoneWidth, availableHeight / phoneHeight), 0.35, 2.5);
+    }
+
+    function updateZoom() {
+      const zoom = els.autoZoom.checked ? autoZoomValue() : Number(els.zoom.value) || 1;
+      document.documentElement.style.setProperty("--zoom", zoom.toFixed(3));
+      els.zoom.disabled = els.autoZoom.checked;
+      if (els.autoZoom.checked) els.zoom.value = String(clamp(zoom, Number(els.zoom.min), Number(els.zoom.max)));
+    }
+
     function applyScreenSize(width, height) {
       els.screenWidth.value = width;
       els.screenHeight.value = height;
       document.documentElement.style.setProperty("--screen-width", `${width}px`);
       document.documentElement.style.setProperty("--screen-height", `${height}px`);
+      updateZoom();
       render();
       updateEditor();
     }
@@ -1920,7 +2099,7 @@
         uid: item.__uid,
         startX: event.clientX,
         startY: event.clientY,
-        zoom: Number(els.zoom.value) || 1,
+        zoom: currentZoom(),
         moved: false,
         historySaved: false
       };
@@ -2040,6 +2219,29 @@
       return binding.name || binding.entity || binding.service || address;
     }
 
+    const bindingRoles = [
+      ["service_call", "Service Call"],
+      ["light_toggle", "Light Toggle"],
+      ["light_rgb_color", "Light RGB Color"],
+      ["light_brightness", "Light Brightness"],
+      ["cover_position", "Cover Position"],
+      ["cover_open", "Cover Open"],
+      ["cover_close", "Cover Close"],
+      ["scene_confirm", "Scene Confirm"],
+      ["select_option", "Select Option"],
+      ["state_label", "State Label"]
+    ];
+
+    function itemForAddress(address) {
+      const match = /^p(\d+)b(\d+)$/.exec(address);
+      if (!match) return null;
+      const page = Number(match[1]);
+      const id = Number(match[2]);
+      return (state.pages.get(page) || []).find(item => Number(item.id) === id)
+        || state.globals.find(item => Number(item.id) === id && Number(item.page || 0) === page)
+        || null;
+    }
+
     function detectBindings() {
       const bindings = {};
       [...state.pages.entries()].forEach(([page, items]) => {
@@ -2058,6 +2260,64 @@
         device: els.exportMqttNode.value.trim() || els.mqttNode.value.trim() || "pantalla",
         bindings
       };
+    }
+
+    function renderBindingMapper() {
+      let parsed;
+      try {
+        parsed = parseExportBindings();
+      } catch (error) {
+        els.bindingMapper.innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      const entries = Object.entries(parsed.bindings).sort(([a], [b]) => a.localeCompare(b));
+      if (!entries.length) {
+        els.bindingMapper.innerHTML = `<div class="empty-state">No bindings yet. Use Detect Bindings to scan this screen.</div>`;
+        return;
+      }
+      els.bindingMapper.innerHTML = entries.map(([address, binding]) => {
+        const item = itemForAddress(address);
+        const role = binding.role || "service_call";
+        const roleOptions = bindingRoles.map(([value, label]) => `<option value="${value}"${value === role ? " selected" : ""}>${label}</option>`).join("");
+        return `
+          <div class="binding-row" data-address="${escapeHtml(address)}">
+            <div class="binding-address">
+              <code>${escapeHtml(address)}</code>
+              <span>${escapeHtml(item ? `${item.obj}${item.text ? ` · ${item.text}` : ""}` : "Not found on current layout")}</span>
+            </div>
+            <label>
+              Role
+              <select data-field="role">${roleOptions}</select>
+            </label>
+            <label>
+              Home Assistant Entity
+              <input data-field="entity" type="text" value="${escapeHtml(binding.entity || "")}" placeholder="light.recibidor">
+            </label>
+            <label>
+              Service / Name
+              <input data-field="service" type="text" value="${escapeHtml(binding.service || "")}" placeholder="script.good_night">
+              <input data-field="name" type="text" value="${escapeHtml(binding.name || "")}" placeholder="Friendly name">
+            </label>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function syncBindingsFromMapper() {
+      if (!els.bindingMapper.children.length) return;
+      const parsed = parseExportBindings();
+      [...els.bindingMapper.querySelectorAll(".binding-row")].forEach(row => {
+        const address = row.dataset.address;
+        const binding = { ...(parsed.bindings[address] || {}) };
+        [...row.querySelectorAll("[data-field]")].forEach(input => {
+          const field = input.dataset.field;
+          const value = input.value.trim();
+          if (value) binding[field] = value;
+          else delete binding[field];
+        });
+        parsed.bindings[address] = binding;
+      });
+      els.exportBindings.value = JSON.stringify(parsed, null, 2);
     }
 
     async function loadExampleBindings() {
@@ -2090,7 +2350,8 @@
       return [
         `  - id: ${safeId(`${prefix}_${address}_${role}`)}`,
         `    alias: ${yamlScalar(`${prefix} ${address} ${label}`)}`,
-        "    mode: restart",
+        "    mode: queued",
+        "    max: 40",
         "    trigger:",
         "      - platform: mqtt",
         `        topic: ${yamlScalar(mqttTopicForAddress(address))}`
@@ -2222,6 +2483,217 @@
       return lines.join("\n");
     }
 
+    function commandTopicForProperty(property) {
+      const base = els.exportMqttBaseTopic.value.trim() || "hasp";
+      const node = els.exportMqttNode.value.trim() || els.mqttNode.value.trim() || "pantalla";
+      return `${base}/${node}/command/${property}`;
+    }
+
+    function backlightAutomations(prefix) {
+      if (!els.exportBacklightEnabled.checked) return [];
+      const command = els.exportBacklightCommand.value.trim() || "backlight";
+      const day = Number(els.exportBacklightDay.value) || 255;
+      const night = Number(els.exportBacklightNight.value) || 40;
+      const nightStart = els.exportNightStart.value.trim() || "23:00:00";
+      const nightEnd = els.exportNightEnd.value.trim() || "07:00:00";
+      const interval = els.exportAntiburnInterval.value.trim() || "/10";
+      const pages = els.exportAntiburnPages.value.split(",").map(page => Number(page.trim())).filter(Number.isFinite);
+      const restorePage = Number(els.exportRestorePage.value) || 1;
+      const motionEntity = els.exportMotionEntity.value.trim();
+      const pageSequence = pages.length ? pages : [restorePage];
+      return [
+        [
+          `  - id: ${safeId(`${prefix}_backlight_day`)}`,
+          `    alias: ${yamlScalar(`${prefix} backlight day`)}`,
+          "    mode: queued",
+          "    max: 40",
+          "    trigger:",
+          "      - platform: time",
+          `        at: ${yamlScalar(nightEnd)}`,
+          "    action:",
+          "      - service: mqtt.publish",
+          "        data:",
+          `          topic: ${yamlScalar(commandTopicForProperty(command))}`,
+          `          payload: ${yamlScalar(day)}`
+        ].join("\n"),
+        [
+          `  - id: ${safeId(`${prefix}_backlight_night`)}`,
+          `    alias: ${yamlScalar(`${prefix} backlight night`)}`,
+          "    mode: queued",
+          "    max: 40",
+          "    trigger:",
+          "      - platform: time",
+          `        at: ${yamlScalar(nightStart)}`,
+          "    action:",
+          "      - service: mqtt.publish",
+          "        data:",
+          `          topic: ${yamlScalar(commandTopicForProperty(command))}`,
+          `          payload: ${yamlScalar(night)}`
+        ].join("\n"),
+        [
+          `  - id: ${safeId(`${prefix}_antiburn_pages`)}`,
+          `    alias: ${yamlScalar(`${prefix} anti-burn pages`)}`,
+          "    mode: queued",
+          "    max: 40",
+          "    trigger:",
+          "      - platform: time_pattern",
+          `        minutes: ${yamlScalar(interval)}`,
+          ...(motionEntity ? [
+            "    condition:",
+            "      - condition: state",
+            `        entity_id: ${yamlScalar(motionEntity)}`,
+            "        state: \"off\""
+          ] : []),
+          "    action:",
+          "      - variables:",
+          `          pages: ${JSON.stringify(pageSequence)}`,
+          "          index: \"{{ (now().minute // 10) % (pages | count) }}\"",
+          "      - service: mqtt.publish",
+          "        data:",
+          `          topic: ${yamlScalar(commandTopicForProperty("page"))}`,
+          "          payload: \"{{ pages[index] }}\""
+        ].join("\n"),
+        ...(motionEntity ? [[
+          `  - id: ${safeId(`${prefix}_restore_page_on_motion`)}`,
+          `    alias: ${yamlScalar(`${prefix} restore page on motion`)}`,
+          "    mode: queued",
+          "    max: 40",
+          "    trigger:",
+          "      - platform: state",
+          `        entity_id: ${yamlScalar(motionEntity)}`,
+          "        to: \"on\"",
+          "    action:",
+          "      - service: mqtt.publish",
+          "        data:",
+          `          topic: ${yamlScalar(commandTopicForProperty("page"))}`,
+          `          payload: ${yamlScalar(restorePage)}`,
+          "      - service: mqtt.publish",
+          "        data:",
+          `          topic: ${yamlScalar(commandTopicForProperty(command))}`,
+          `          payload: ${yamlScalar(day)}`
+        ].join("\n")] : [])
+      ];
+    }
+
+    function hacsPropertiesForBinding(binding) {
+      const entity = binding.entity || "";
+      const role = binding.role || "service_call";
+      if (!entity) return [];
+      if (role === "light_toggle") return [
+        ["val", `{{ 1 if is_state("${entity}", "on") else 0 }}`]
+      ];
+      if (role === "light_brightness" || role === "cover_position") return [
+        ["val", `{{ state_attr("${entity}", "brightness") | int(0) }}`]
+      ];
+      if (role === "state_label") return [
+        ["text", `{{ states("${entity}") }}`]
+      ];
+      if (role === "select_option") return [
+        ["options", `{% for item in state_attr("${entity}", "options") or [] %}{{ item }}{% if not loop.last %}\\n{% endif %}{% endfor %}`],
+        ["text", `{{ states("${entity}") }}`]
+      ];
+      return [];
+    }
+
+    function hacsEventForBinding(binding) {
+      const role = binding.role || "service_call";
+      const entity = binding.entity || "";
+      const service = binding.service || "";
+      if (role === "light_toggle") return { event: "up", service: "homeassistant.toggle", entity };
+      if (role === "light_rgb_color") return {
+        event: "changed",
+        service: "light.turn_on",
+        entity: entity || "light.replace_me",
+        data: {
+          rgb_color: ["{{ r | int(255) }}", "{{ g | int(255) }}", "{{ b | int(255) }}"]
+        }
+      };
+      if (role === "light_brightness") return {
+        event: "changed",
+        service: "light.turn_on",
+        entity: entity || "light.replace_me",
+        data: { brightness_pct: "{{ val | int(0) }}" }
+      };
+      if (role === "cover_position") return {
+        event: "changed",
+        service: "cover.set_cover_position",
+        entity: entity || "cover.replace_me",
+        data: { position: "{{ val | int(0) }}" }
+      };
+      if (role === "cover_open" || role === "cover_close") return {
+        event: "up",
+        service: role === "cover_open" ? "cover.open_cover" : "cover.close_cover",
+        entity: entity || "cover.replace_me"
+      };
+      if (role === "scene_confirm") return {
+        event: "up",
+        service: entity ? "scene.turn_on" : "persistent_notification.create",
+        entity,
+        data: entity ? null : { title: binding.name || "openHASP action", message: "Confirmation requested from openHASP" }
+      };
+      if (role === "select_option") return {
+        event: "changed",
+        service: "select.select_option",
+        entity: entity || "select.replace_me",
+        data: { option: "{{ text | default(val) }}" }
+      };
+      if (role === "state_label") return null;
+      return {
+        event: "up",
+        service: service || "persistent_notification.create",
+        entity,
+        data: service ? binding.data : { title: "Unmapped openHASP action", message: `${binding.name || "Object"} needs a service/entity binding` }
+      };
+    }
+
+    function hacsDataLines(value, indent) {
+      const pad = " ".repeat(indent);
+      if (!value || typeof value !== "object") return [];
+      return Object.entries(value).flatMap(([key, val]) => {
+        if (Array.isArray(val)) return [
+          `${pad}${key}:`,
+          ...val.map(item => `${" ".repeat(indent + 2)}- ${yamlScalar(item)}`)
+        ];
+        if (val && typeof val === "object") return [`${pad}${key}:`, ...hacsDataLines(val, indent + 2)];
+        return [`${pad}${key}: ${yamlScalar(val)}`];
+      });
+    }
+
+    function hacsObjectYaml(address, binding) {
+      const lines = [`      - obj: ${yamlScalar(address)}`];
+      const properties = hacsPropertiesForBinding(binding);
+      const event = hacsEventForBinding(binding);
+      if (properties.length) {
+        lines.push("        properties:");
+        properties.forEach(([key, value]) => lines.push(`          "${key}": ${yamlScalar(value)}`));
+      }
+      if (event) {
+        lines.push("        event:", `          "${event.event}":`, `            - service: ${yamlScalar(event.service)}`);
+        if (event.entity) lines.push(`              entity_id: ${yamlScalar(event.entity)}`);
+        if (event.data && typeof event.data === "object") {
+          lines.push("              data:", ...hacsDataLines(event.data, 16));
+        }
+      }
+      return lines.join("\n");
+    }
+
+    function generateOpenHaspHacsYaml() {
+      const bindingsConfig = parseExportBindings();
+      const node = els.exportMqttNode.value.trim() || els.mqttNode.value.trim() || "pantalla";
+      const entries = Object.entries(bindingsConfig.bindings).sort(([a], [b]) => a.localeCompare(b));
+      const objects = entries.map(([address, binding]) => hacsObjectYaml(address, binding)).join("\n");
+      return [
+        "# Generated by openHASP Editor",
+        "# Requires the openHASP Home Assistant custom component from HACS.",
+        "# For split configuration you can also use: openhasp: !include openhasp.yaml",
+        "openhasp:",
+        `  ${safeId(node)}:`,
+        "    objects:",
+        objects || "      []",
+        ""
+      ].join("\n");
+    }
+
     function generateHomeAssistantYaml() {
       const bindingsConfig = parseExportBindings();
       const prefix = safeId(els.exportAutomationPrefix.value || "openhasp");
@@ -2232,7 +2704,9 @@
       const username = els.exportBrokerUsername.value.trim();
       const password = els.exportBrokerPassword.value.trim();
       const entries = Object.entries(bindingsConfig.bindings).sort(([a], [b]) => a.localeCompare(b));
-      const body = entries.map(([address, binding]) => automationForBinding(address, binding, prefix)).join("\n\n");
+      const automations = entries.map(([address, binding]) => automationForBinding(address, binding, prefix))
+        .concat(backlightAutomations(prefix));
+      const body = automations.join("\n\n");
       const lines = [
         "# Generated by openHASP Editor",
         `# Device: ${node}`,
@@ -2254,9 +2728,42 @@
       ]).join("\n");
     }
 
+    function defaultExportFilename() {
+      return els.exportFormat.value === "hacs"
+        ? "openhasp_hacs_config.yaml"
+        : "openhasp_homeassistant_automations.yaml";
+    }
+
+    function updateExportFormatUi() {
+      const isHacs = els.exportFormat.value === "hacs";
+      els.exportFormatHelp.textContent = isHacs
+        ? "Generates openhasp: objects with properties and events for the HACS custom component. Backlight options are handled by the integration or the MQTT automation export."
+        : "Generates plain MQTT automations. Use this if you do not want the HACS custom component.";
+      [
+        els.exportBacklightEnabled,
+        els.exportBacklightCommand,
+        els.exportBacklightDay,
+        els.exportBacklightNight,
+        els.exportNightStart,
+        els.exportNightEnd,
+        els.exportAntiburnInterval,
+        els.exportAntiburnPages,
+        els.exportRestorePage,
+        els.exportMotionEntity
+      ].forEach(input => {
+        input.disabled = isHacs;
+      });
+      const knownNames = ["openhasp_hacs_config.yaml", "openhasp_homeassistant_automations.yaml"];
+      if (!els.exportFilename.value.trim() || knownNames.includes(els.exportFilename.value.trim())) {
+        els.exportFilename.value = defaultExportFilename();
+      }
+    }
+
     function openExportModal() {
       els.exportMqttNode.value = els.mqttNode.value.trim() || "pantalla";
       if (!els.exportBindings.value.trim()) els.exportBindings.value = JSON.stringify(detectBindings(), null, 2);
+      updateExportFormatUi();
+      renderBindingMapper();
       els.exportError.textContent = "";
       els.exportModal.hidden = false;
     }
@@ -2267,7 +2774,10 @@
 
     function generateExportOutput() {
       try {
-        els.exportOutput.value = generateHomeAssistantYaml();
+        syncBindingsFromMapper();
+        els.exportOutput.value = els.exportFormat.value === "hacs"
+          ? generateOpenHaspHacsYaml()
+          : generateHomeAssistantYaml();
         els.exportError.textContent = "";
       } catch (error) {
         els.exportOutput.value = "";
@@ -2305,7 +2815,7 @@
           : [item];
         if (!hasSelectedItem(item)) selectItem(item, false);
         el.classList.add("selected");
-        const zoom = Number(els.zoom.value) || 1;
+        const zoom = currentZoom();
         drag = {
           startX: event.clientX,
           startY: event.clientY,
@@ -2739,18 +3249,42 @@
     });
     els.detectBindingsBtn.addEventListener("click", () => {
       els.exportBindings.value = JSON.stringify(detectBindings(), null, 2);
+      renderBindingMapper();
       els.exportError.textContent = "";
     });
-    els.loadExampleBindingsBtn.addEventListener("click", loadExampleBindings);
+    els.loadExampleBindingsBtn.addEventListener("click", async () => {
+      await loadExampleBindings();
+      renderBindingMapper();
+    });
+    els.refreshMapperBtn.addEventListener("click", renderBindingMapper);
+    els.bindingMapper.addEventListener("input", () => {
+      try {
+        syncBindingsFromMapper();
+        els.exportError.textContent = "";
+      } catch (error) {
+        els.exportError.textContent = error.message;
+      }
+    });
+    els.bindingMapper.addEventListener("change", () => {
+      try {
+        syncBindingsFromMapper();
+        els.exportError.textContent = "";
+      } catch (error) {
+        els.exportError.textContent = error.message;
+      }
+    });
+    els.exportFormat.addEventListener("change", () => {
+      updateExportFormatUi();
+      generateExportOutput();
+    });
     els.generateHaYamlBtn.addEventListener("click", generateExportOutput);
     els.downloadHaYamlBtn.addEventListener("click", downloadHomeAssistantYaml);
     els.screen.addEventListener("click", () => selectItem(null));
     els.resolutionPreset.addEventListener("change", applyResolutionPreset);
     els.screenWidth.addEventListener("change", syncCustomResolution);
     els.screenHeight.addEventListener("change", syncCustomResolution);
-    els.zoom.addEventListener("input", () => {
-      document.documentElement.style.setProperty("--zoom", els.zoom.value);
-    });
+    els.zoom.addEventListener("input", updateZoom);
+    els.autoZoom.addEventListener("change", updateZoom);
     els.upload.addEventListener("change", async event => {
       const file = event.target.files[0];
       if (!file) return;
@@ -2837,7 +3371,10 @@
       }
     });
 
-    document.documentElement.style.setProperty("--zoom", els.zoom.value);
+    const zoomObserver = new ResizeObserver(updateZoom);
+    zoomObserver.observe(els.main);
+    window.addEventListener("resize", updateZoom);
+    updateZoom();
     applyScreenSize(Number(els.screenWidth.value), Number(els.screenHeight.value));
     loadSelectedFile();
   </script>
