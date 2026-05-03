@@ -2372,7 +2372,8 @@
       };
       if (arrowDeltas[event.key] && !isTypingTarget(event.target) && selectedPageItems().length) {
         event.preventDefault();
-        moveSelectionBy(...arrowDeltas[event.key]);
+        const step = event.shiftKey ? 10 : 1;
+        moveSelectionBy(arrowDeltas[event.key][0] * step, arrowDeltas[event.key][1] * step);
         return;
       }
       const mod = event.ctrlKey || event.metaKey;
