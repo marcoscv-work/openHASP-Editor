@@ -819,7 +819,7 @@
 
       <label>
         Zoom
-        <input id="zoom" type="range" min="0.35" max="2.5" value="1" step="0.05">
+        <input id="zoom" type="range" min="0.35" max="1.5" value="1" step="0.05">
       </label>
       <label style="display:flex; grid-template-columns:none; align-items:center; gap:10px; text-transform:none; font-size:13px;">
         <input id="autoZoom" type="checkbox" checked style="width:auto;">
@@ -1391,7 +1391,7 @@
       const availableHeight = Math.max(160, rect.height - 98);
       const phoneWidth = width + 28;
       const phoneHeight = height + 28;
-      return clamp(Math.min(availableWidth / phoneWidth, availableHeight / phoneHeight), 0.35, 2.5);
+      return clamp(Math.min(availableWidth / phoneWidth, availableHeight / phoneHeight), 0.35, 1.5);
     }
 
     function updateZoom() {
