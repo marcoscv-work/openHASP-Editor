@@ -374,6 +374,46 @@
       cursor: nwse-resize;
     }
 
+    .measure-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 70;
+      pointer-events: none;
+      color: #9ed0ff;
+      font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .measure-selection {
+      position: absolute;
+      border: 1px solid rgba(158, 208, 255, 0.95);
+      box-shadow: 0 0 0 1px rgba(4, 10, 16, 0.72);
+    }
+
+    .measure-line {
+      position: absolute;
+      background: rgba(158, 208, 255, 0.9);
+    }
+
+    .measure-line.horizontal {
+      height: 1px;
+    }
+
+    .measure-line.vertical {
+      width: 1px;
+    }
+
+    .measure-label {
+      position: absolute;
+      min-width: 24px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: rgba(7, 12, 18, 0.92);
+      color: #d8ecff;
+      text-align: center;
+      white-space: nowrap;
+      transform: translate(-50%, -50%);
+    }
+
     .lv-img {
       object-fit: cover;
     }
@@ -827,6 +867,7 @@
       sourceLines: 0,
       selectedUid: null,
       selectedUids: [],
+      showMeasurements: false,
       uidCounter: 1,
       undoStack: [],
       redoStack: []
@@ -1124,6 +1165,22 @@
         w: Number(valueOr(item, "w", item.obj === "img" ? size.width : 80)),
         h: Number(valueOr(item, "h", item.obj === "img" ? size.height : 40))
       };
+    }
+
+    function selectionBounds(items = selectedPageItems()) {
+      if (!items.length) return null;
+      return items.reduce((bounds, item) => {
+        const box = itemBox(item);
+        const right = box.x + box.w;
+        const bottom = box.y + box.h;
+        if (!bounds) return { x: box.x, y: box.y, right, bottom };
+        return {
+          x: Math.min(bounds.x, box.x),
+          y: Math.min(bounds.y, box.y),
+          right: Math.max(bounds.right, right),
+          bottom: Math.max(bounds.bottom, bottom)
+        };
+      }, null);
     }
 
     function cleanItem(item) {
@@ -1569,6 +1626,19 @@
     function selectedPageItems() {
       const selected = new Set(state.selectedUids);
       return (state.pages.get(state.currentPage) || []).filter(item => selected.has(item.__uid));
+    }
+
+    function moveSelectionBy(dx, dy) {
+      const items = selectedPageItems();
+      if (!items.length) return false;
+      pushUndoState();
+      items.forEach(item => {
+        item.x = Number(valueOr(item, "x", 0)) + dx;
+        item.y = Number(valueOr(item, "y", 0)) + dy;
+      });
+      render();
+      updateEditor();
+      return true;
     }
 
     function targetPageNumber() {
@@ -2147,6 +2217,65 @@
       els.screen.append(overlay);
     }
 
+    function addMeasureLine(overlay, orientation, start, end, cross, text) {
+      if (end <= start) return;
+      const line = document.createElement("div");
+      line.className = `measure-line ${orientation}`;
+      if (orientation === "horizontal") {
+        Object.assign(line.style, {
+          left: `${start}px`,
+          top: `${cross}px`,
+          width: `${end - start}px`
+        });
+      } else {
+        Object.assign(line.style, {
+          left: `${cross}px`,
+          top: `${start}px`,
+          height: `${end - start}px`
+        });
+      }
+      const label = document.createElement("div");
+      label.className = "measure-label";
+      label.textContent = text;
+      Object.assign(label.style, orientation === "horizontal"
+        ? { left: `${start + (end - start) / 2}px`, top: `${cross}px` }
+        : { left: `${cross}px`, top: `${start + (end - start) / 2}px` });
+      overlay.append(line, label);
+    }
+
+    function renderMeasurements() {
+      if (!state.showMeasurements) return;
+      const bounds = selectionBounds();
+      if (!bounds) return;
+      const size = screenSize();
+      const box = {
+        x: bounds.x,
+        y: bounds.y,
+        w: bounds.right - bounds.x,
+        h: bounds.bottom - bounds.y
+      };
+      const overlay = document.createElement("div");
+      overlay.className = "measure-overlay";
+
+      const selection = document.createElement("div");
+      selection.className = "measure-selection";
+      Object.assign(selection.style, {
+        left: `${box.x}px`,
+        top: `${box.y}px`,
+        width: `${box.w}px`,
+        height: `${box.h}px`
+      });
+      overlay.append(selection);
+
+      const centerX = box.x + box.w / 2;
+      const centerY = box.y + box.h / 2;
+      addMeasureLine(overlay, "horizontal", 0, box.x, centerY, `x ${Math.round(box.x)}`);
+      addMeasureLine(overlay, "horizontal", bounds.right, size.width, centerY, `${Math.round(size.width - bounds.right)}`);
+      addMeasureLine(overlay, "vertical", 0, box.y, centerX, `y ${Math.round(box.y)}`);
+      addMeasureLine(overlay, "vertical", bounds.bottom, size.height, centerX, `${Math.round(size.height - bounds.bottom)}`);
+      els.screen.append(overlay);
+    }
+
     function render() {
       els.screen.innerHTML = "";
       const pageItems = state.pages.get(state.currentPage) || [];
@@ -2160,6 +2289,7 @@
         els.screen.append(element);
       });
       renderResizeBox();
+      renderMeasurements();
 
       const objectCounts = items.reduce((counts, item) => {
         counts[item.obj] = (counts[item.obj] || 0) + 1;
@@ -2224,9 +2354,25 @@
     els.pageDownloadBtn.addEventListener("click", downloadJsonl);
     els.deletePageBtn.addEventListener("click", deleteCurrentPage);
     window.addEventListener("keydown", event => {
+      if (event.key === "Alt" && !state.showMeasurements) {
+        state.showMeasurements = true;
+        render();
+        return;
+      }
       if ((event.key === "Delete" || event.key === "Backspace") && !isTypingTarget(event.target) && selectedPageItems().length) {
         event.preventDefault();
         deleteSelectedElement();
+        return;
+      }
+      const arrowDeltas = {
+        ArrowLeft: [-1, 0],
+        ArrowRight: [1, 0],
+        ArrowUp: [0, -1],
+        ArrowDown: [0, 1]
+      };
+      if (arrowDeltas[event.key] && !isTypingTarget(event.target) && selectedPageItems().length) {
+        event.preventDefault();
+        moveSelectionBy(...arrowDeltas[event.key]);
         return;
       }
       const mod = event.ctrlKey || event.metaKey;
@@ -2243,6 +2389,18 @@
       } else if ((key === "z" && event.shiftKey) || key === "y") {
         event.preventDefault();
         redo();
+      }
+    });
+    window.addEventListener("keyup", event => {
+      if (event.key === "Alt" && state.showMeasurements) {
+        state.showMeasurements = false;
+        render();
+      }
+    });
+    window.addEventListener("blur", () => {
+      if (state.showMeasurements) {
+        state.showMeasurements = false;
+        render();
       }
     });
 
