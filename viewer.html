@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>openHASP Editor</title>
   <style>
+    @font-face {
+      font-family: "Material Design Icons";
+      src: url("https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/fonts/materialdesignicons-webfont.woff2") format("woff2");
+      font-weight: normal;
+      font-style: normal;
+      font-display: block;
+    }
+
     :root {
       color-scheme: dark;
       --bg: #101214;
@@ -130,6 +138,11 @@
       color: var(--text);
       font: inherit;
       text-transform: none;
+    }
+
+    #editIcon,
+    #editIcon option {
+      font-family: "Material Design Icons", Inter, ui-sans-serif, system-ui, sans-serif;
     }
 
     textarea {
@@ -450,6 +463,12 @@
       fill: currentColor;
       line-height: 1;
       vertical-align: -0.14em;
+    }
+
+    .mdi-glyph {
+      font-family: "Material Design Icons", Inter, ui-sans-serif, system-ui, sans-serif;
+      font-weight: normal;
+      line-height: 1;
     }
 
     .lv-obj {
@@ -2902,7 +2921,156 @@
       });
     }
 
-    const openHaspIcons = {
+    const openHaspIconNames = {
+      E045: "arrow-down",
+      E6C0: "arrow-down-box",
+      E04D: "arrow-left",
+      E054: "arrow-right",
+      E05D: "arrow-up",
+      E6C3: "arrow-up-box",
+      E140: "chevron-down",
+      E141: "chevron-left",
+      E142: "chevron-right",
+      E143: "chevron-up",
+      E60C: "subdirectory-arrow-left",
+      E01B: "air-conditioner",
+      E957: "cloud-search-outline",
+      E238: "fire",
+      E438: "radiator",
+      EAD7: "radiator-disabled",
+      E717: "snowflake",
+      E50F: "thermometer",
+      E58C: "water",
+      E58E: "water-percent",
+      E590: "weather-cloudy",
+      E591: "weather-fog",
+      E592: "weather-hail",
+      E593: "weather-lightning",
+      E67E: "weather-lightning-rainy",
+      E594: "weather-night",
+      E595: "weather-partly-cloudy",
+      E596: "weather-pouring",
+      E597: "weather-rainy",
+      E598: "weather-snowy",
+      E67F: "weather-snowy-rainy",
+      E599: "weather-sunny",
+      E59D: "weather-windy",
+      E59E: "weather-windy-variant",
+      E5A8: "white-balance-sunny",
+      E0ED: "calendar",
+      E150: "clock-outline",
+      E2DA: "history",
+      E51B: "timer-outline",
+      E0AF: "bluetooth",
+      E5A9: "wifi",
+      E0AC: "blinds",
+      F011: "blinds-open",
+      F2D4: "garage-open-variant",
+      F2D3: "garage-variant",
+      F11C: "window-shutter",
+      F11D: "window-shutter-alert",
+      F11E: "window-shutter-open",
+      E09A: "bell",
+      E11C: "cellphone",
+      EAAC: "dishwasher",
+      E1FA: "engine",
+      E210: "fan",
+      E96B: "fountain",
+      E28F: "fridge-outline",
+      E5FA: "kettle",
+      E322: "laptop",
+      EC99: "microwave",
+      F39D: "recycle-variant",
+      F1F3: "robot-mower-outline",
+      E70D: "robot-vacuum",
+      E4DE: "stove",
+      E502: "television",
+      EA7A: "trash-can-outline",
+      E917: "tumble-dryer",
+      E72A: "washing-machine",
+      E58F: "water-pump",
+      E6C1: "arrow-left-box",
+      E6C2: "arrow-right-box",
+      EAD8: "radiator-off",
+      EF30: "weather-hazy",
+      EF31: "weather-night-partly-cloudy",
+      ED3E: "transmission-tower",
+      F2A3: "battery-high",
+      F2A1: "battery-low",
+      F2A2: "battery-medium",
+      E08E: "battery-outline",
+      E5F1: "ev-station",
+      E32A: "leaf",
+      F40B: "lightning-bolt",
+      E425: "power",
+      E6A5: "power-plug",
+      E769: "ceiling-light",
+      F020: "coach-lamp",
+      E95F: "desk-lamp",
+      E8DD: "floor-lamp",
+      E6B5: "lamp",
+      E335: "lightbulb",
+      E6E8: "lightbulb-on",
+      F054: "outdoor-lamp",
+      F2BA: "string-lights",
+      F1E1: "vanity-light",
+      E91C: "wall-sconce",
+      E12C: "check",
+      E156: "close",
+      E493: "cog",
+      E1D9: "dots-vertical",
+      E2DC: "home",
+      E6A1: "home-outline",
+      E374: "minus",
+      E415: "plus",
+      E2E3: "bed",
+      E10B: "car",
+      E176: "coffee",
+      E606: "pool",
+      E9A0: "shower",
+      EA70: "silverware-fork-knife",
+      E4B9: "sofa",
+      E9AB: "toilet",
+      E004: "account",
+      E64A: "human-greeting",
+      E70E: "run",
+      E026: "alert",
+      E7AE: "cctv",
+      E81B: "door-closed",
+      F0AF: "door-closed-lock",
+      E81C: "door-open",
+      E30B: "key-variant",
+      E33E: "lock",
+      EFC6: "lock-open-variant",
+      E565: "shield-check",
+      E68A: "shield-home",
+      E99D: "shield-lock",
+      F1DB: "window-closed-variant",
+      EF5F: "monitor-speaker",
+      E75A: "music",
+      E3E4: "pause",
+      E40A: "play",
+      E456: "repeat",
+      E457: "repeat-off",
+      E458: "repeat-once",
+      E49D: "shuffle",
+      E49E: "shuffle-disabled",
+      E4AD: "skip-next",
+      E4AE: "skip-previous",
+      E4C3: "speaker",
+      E4DB: "stop",
+      E57E: "volume-high",
+      E580: "volume-medium",
+      E75F: "volume-mute",
+      ED9B: "solar-panel",
+      ED9C: "solar-panel-large",
+      EA72: "solar-power",
+      FA74: "solar-power-variant-outline",
+      F92D: "transmission-tower-import",
+      F92C: "transmission-tower-export"
+    };
+
+    const openHaspIconPaths = {
       E045: { name: "arrow-down", path: "M11,4H13V16L18.5,10.5L19.92,11.92L12,19.84L4.08,11.92L5.5,10.5L11,16V4Z" },
       E05D: { name: "arrow-up", path: "M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z" },
       E141: { name: "chevron-left", path: "M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" },
@@ -2928,9 +3096,9 @@
     function populateIconSelect() {
       const options = [
         `<option value="">No icon</option>`,
-        ...Object.entries(openHaspIcons)
-          .sort(([, a], [, b]) => a.name.localeCompare(b.name))
-          .map(([code, icon]) => `<option value="${code}">${code} · ${escapeHtml(icon.name)}</option>`)
+        ...Object.entries(openHaspIconNames)
+          .sort(([, a], [, b]) => a.localeCompare(b))
+          .map(([code, name]) => `<option value="${code}">${String.fromCodePoint(parseInt(code, 16))} ${code} · ${escapeHtml(name)}</option>`)
       ];
       els.editIcon.innerHTML = options.join("");
     }
@@ -2941,9 +3109,13 @@
         if (!part) return;
         if (/^[\uE000-\uF8FF]$/u.test(part)) {
           const code = part.codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
-          const match = openHaspIcons[code];
+          const match = openHaspIconPaths[code];
           if (!match) {
-            el.append(document.createTextNode(part));
+            const fallback = document.createElement("span");
+            fallback.className = "mdi-glyph";
+            fallback.textContent = part;
+            fallback.title = `${code} · ${openHaspIconNames[code] || "custom icon"}`;
+            el.append(fallback);
             return;
           }
           const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
