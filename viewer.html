@@ -1813,14 +1813,20 @@
         if (event.shiftKey) {
           return;
         }
-        selectItem(item, false);
+        const movingItems = hasSelectedItem(item) && state.selectedUids.length > 1
+          ? selectedPageItems()
+          : [item];
+        if (!hasSelectedItem(item)) selectItem(item, false);
         el.classList.add("selected");
         const zoom = Number(els.zoom.value) || 1;
         drag = {
           startX: event.clientX,
           startY: event.clientY,
-          itemX: Number(valueOr(item, "x", 0)),
-          itemY: Number(valueOr(item, "y", 0)),
+          items: movingItems.map(candidate => ({
+            item: candidate,
+            x: Number(valueOr(candidate, "x", 0)),
+            y: Number(valueOr(candidate, "y", 0))
+          })),
           moved: false,
           historySaved: false,
           zoom
@@ -1837,16 +1843,22 @@
           pushUndoState();
           drag.historySaved = true;
         }
-        item.x = Math.round(drag.itemX + dx);
-        item.y = Math.round(drag.itemY + dy);
-        el.style.left = `${item.x}px`;
-        el.style.top = `${item.y}px`;
+        drag.items.forEach(entry => {
+          entry.item.x = Math.round(entry.x + dx);
+          entry.item.y = Math.round(entry.y + dy);
+          const node = els.screen.querySelector(`.lv[data-uid="${entry.item.__uid}"]`);
+          if (node) {
+            node.style.left = `${entry.item.x}px`;
+            node.style.top = `${entry.item.y}px`;
+          }
+        });
         updateEditor();
       });
 
       el.addEventListener("pointerup", event => {
         if (!drag) return;
         el.releasePointerCapture(event.pointerId);
+        if (drag.moved) render();
         drag = null;
       });
     }
