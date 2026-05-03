@@ -606,6 +606,55 @@
       fill: currentColor;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: rgba(0, 0, 0, 0.62);
+    }
+
+    .modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .modal {
+      width: min(920px, 100%);
+      max-height: min(880px, calc(100vh - 44px));
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #11161b;
+      box-shadow: 0 24px 90px rgba(0, 0, 0, 0.58);
+      overflow: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .modal textarea {
+      min-height: 180px;
+    }
+
+    .modal textarea.output {
+      min-height: 240px;
+    }
+
     .error {
       color: #ffb2a8;
     }
@@ -628,6 +677,10 @@
 
       main {
         padding: 18px;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -706,6 +759,7 @@
       </div>
 
       <div id="stats" class="stats"></div>
+      <button id="openExportBtn">Export</button>
     </aside>
 
     <main>
@@ -856,6 +910,72 @@
     </section>
   </div>
 
+  <div id="exportModal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <div class="modal-header">
+        <div>
+          <h1 id="exportTitle">Export</h1>
+          <p class="muted">Generate Home Assistant automations from openHASP object bindings.</p>
+        </div>
+        <button id="closeExportBtn" class="icon-button" title="Close" aria-label="Close">×</button>
+      </div>
+
+      <div class="modal-grid">
+        <label>
+          MQTT Broker
+          <input id="exportBrokerHost" type="text" value="homeassistant.local">
+        </label>
+        <label>
+          MQTT Port
+          <input id="exportBrokerPort" type="number" value="1883" min="1" max="65535">
+        </label>
+        <label>
+          MQTT Username
+          <input id="exportBrokerUsername" type="text" placeholder="optional">
+        </label>
+        <label>
+          MQTT Password
+          <input id="exportBrokerPassword" type="text" placeholder="optional">
+        </label>
+        <label>
+          MQTT Base Topic
+          <input id="exportMqttBaseTopic" type="text" value="hasp">
+        </label>
+        <label>
+          openHASP Node
+          <input id="exportMqttNode" type="text" value="pantalla">
+        </label>
+        <label>
+          Automation Prefix
+          <input id="exportAutomationPrefix" type="text" value="openhasp">
+        </label>
+        <label>
+          Output File
+          <input id="exportFilename" type="text" value="openhasp_homeassistant_automations.yaml">
+        </label>
+      </div>
+
+      <label>
+        Bindings JSON
+        <textarea id="exportBindings" spellcheck="false"></textarea>
+      </label>
+
+      <div id="exportError" class="error"></div>
+
+      <div class="editor-actions">
+        <button id="detectBindingsBtn">Detect Bindings</button>
+        <button id="loadExampleBindingsBtn">Load Example</button>
+        <button id="generateHaYamlBtn">Generate YAML</button>
+        <button id="downloadHaYamlBtn">Download YAML</button>
+      </div>
+
+      <label>
+        Home Assistant YAML
+        <textarea id="exportOutput" class="output" spellcheck="false" readonly></textarea>
+      </label>
+    </div>
+  </div>
+
   <script>
     const state = {
       filename: "pages_480_sample.jsonl",
@@ -883,6 +1003,7 @@
       reloadBtn: document.querySelector("#reloadBtn"),
       upload: document.querySelector("#upload"),
       zoom: document.querySelector("#zoom"),
+      openExportBtn: document.querySelector("#openExportBtn"),
       tabs: document.querySelector("#tabs"),
       stats: document.querySelector("#stats"),
       screen: document.querySelector("#screen"),
@@ -923,7 +1044,24 @@
       redoBtn: document.querySelector("#redoBtn"),
       downloadBtn: document.querySelector("#downloadBtn"),
       deleteElementBtn: document.querySelector("#deleteElementBtn"),
-      clearSelectionBtn: document.querySelector("#clearSelectionBtn")
+      clearSelectionBtn: document.querySelector("#clearSelectionBtn"),
+      exportModal: document.querySelector("#exportModal"),
+      closeExportBtn: document.querySelector("#closeExportBtn"),
+      exportBrokerHost: document.querySelector("#exportBrokerHost"),
+      exportBrokerPort: document.querySelector("#exportBrokerPort"),
+      exportBrokerUsername: document.querySelector("#exportBrokerUsername"),
+      exportBrokerPassword: document.querySelector("#exportBrokerPassword"),
+      exportMqttBaseTopic: document.querySelector("#exportMqttBaseTopic"),
+      exportMqttNode: document.querySelector("#exportMqttNode"),
+      exportAutomationPrefix: document.querySelector("#exportAutomationPrefix"),
+      exportFilename: document.querySelector("#exportFilename"),
+      exportBindings: document.querySelector("#exportBindings"),
+      exportError: document.querySelector("#exportError"),
+      detectBindingsBtn: document.querySelector("#detectBindingsBtn"),
+      loadExampleBindingsBtn: document.querySelector("#loadExampleBindingsBtn"),
+      generateHaYamlBtn: document.querySelector("#generateHaYamlBtn"),
+      downloadHaYamlBtn: document.querySelector("#downloadHaYamlBtn"),
+      exportOutput: document.querySelector("#exportOutput")
     };
 
     function stripComment(line) {
@@ -1871,6 +2009,283 @@
       URL.revokeObjectURL(anchor.href);
     }
 
+    function yamlScalar(value) {
+      if (value === null || value === undefined) return "\"\"";
+      if (typeof value === "number" || typeof value === "boolean") return String(value);
+      const text = String(value);
+      if (/^[a-zA-Z0-9_.:/@-]+$/.test(text)) return text;
+      return JSON.stringify(text);
+    }
+
+    function yamlObject(value, indent = 0) {
+      const pad = " ".repeat(indent);
+      if (!value || typeof value !== "object" || Array.isArray(value)) return `${pad}${yamlScalar(value)}`;
+      return Object.entries(value)
+        .map(([key, val]) => {
+          if (val && typeof val === "object" && !Array.isArray(val)) return `${pad}${key}:\n${yamlObject(val, indent + 2)}`;
+          if (Array.isArray(val)) {
+            const items = val.map(item => `${" ".repeat(indent + 2)}- ${yamlScalar(item)}`).join("\n");
+            return `${pad}${key}:\n${items}`;
+          }
+          return `${pad}${key}: ${yamlScalar(val)}`;
+        })
+        .join("\n");
+    }
+
+    function safeId(value) {
+      return String(value || "item").toLowerCase().replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "") || "item";
+    }
+
+    function bindingLabel(address, binding) {
+      return binding.name || binding.entity || binding.service || address;
+    }
+
+    function detectBindings() {
+      const bindings = {};
+      [...state.pages.entries()].forEach(([page, items]) => {
+        items.filter(isInspectable).forEach(item => {
+          const address = objectAddress(item, page);
+          if (item.obj === "btn") bindings[address] = { role: "service_call", service: "", entity: "", automation: "actions", name: item.text || address };
+          else if (item.obj === "switch") bindings[address] = { role: "light_toggle", entity: "", automation: "lights" };
+          else if (item.obj === "cpicker") bindings[address] = { role: "light_rgb_color", entity: "", automation: "lights" };
+          else if (item.obj === "slider" || item.obj === "arc") bindings[address] = { role: "cover_position", entity: "", automation: "covers" };
+          else if (item.obj === "dropdown") bindings[address] = { role: "select_option", entity: "", automation: "selects" };
+          else if (item.obj === "label") bindings[address] = { role: "state_label", entity: "", automation: "states" };
+        });
+      });
+      return {
+        version: 1,
+        device: els.exportMqttNode.value.trim() || els.mqttNode.value.trim() || "pantalla",
+        bindings
+      };
+    }
+
+    async function loadExampleBindings() {
+      try {
+        const response = await fetch("config/bindings.openhasp.example.json", { cache: "no-store" });
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        els.exportBindings.value = JSON.stringify(await response.json(), null, 2);
+        els.exportError.textContent = "";
+      } catch (error) {
+        els.exportError.textContent = `Could not load example bindings: ${error.message}`;
+      }
+    }
+
+    function parseExportBindings() {
+      const parsed = JSON.parse(els.exportBindings.value || "{}");
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Bindings JSON must be an object.");
+      if (!parsed.bindings || typeof parsed.bindings !== "object" || Array.isArray(parsed.bindings)) throw new Error("Bindings JSON must include a bindings object.");
+      return parsed;
+    }
+
+    function mqttTopicForAddress(address, suffix = "state") {
+      const base = els.exportMqttBaseTopic.value.trim() || "hasp";
+      const node = els.exportMqttNode.value.trim() || els.mqttNode.value.trim() || "pantalla";
+      return `${base}/${node}/${suffix}/${address}`;
+    }
+
+    function automationHeader(prefix, address, binding) {
+      const role = safeId(binding.role || "action");
+      const label = bindingLabel(address, binding);
+      return [
+        `  - id: ${safeId(`${prefix}_${address}_${role}`)}`,
+        `    alias: ${yamlScalar(`${prefix} ${address} ${label}`)}`,
+        "    mode: restart",
+        "    trigger:",
+        "      - platform: mqtt",
+        `        topic: ${yamlScalar(mqttTopicForAddress(address))}`
+      ];
+    }
+
+    function automationForBinding(address, binding, prefix) {
+      const lines = automationHeader(prefix, address, binding);
+      const role = binding.role || "service_call";
+      const entity = binding.entity || "";
+      const service = binding.service || "";
+
+      if (role === "light_toggle") {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event in ['up', 'long'] }}\"",
+          "    action:",
+          "      - service: light.toggle",
+          "        target:",
+          `          entity_id: ${yamlScalar(entity || "light.replace_me")}`
+        );
+      } else if (role === "light_rgb_color") {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event == 'changed' }}\"",
+          "    action:",
+          "      - service: light.turn_on",
+          "        target:",
+          `          entity_id: ${yamlScalar(entity || "light.replace_me")}`,
+          "        data:",
+          "          rgb_color:",
+          "            - \"{{ trigger.payload_json.r | int(255) }}\"",
+          "            - \"{{ trigger.payload_json.g | int(255) }}\"",
+          "            - \"{{ trigger.payload_json.b | int(255) }}\""
+        );
+      } else if (role === "light_brightness") {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event == 'changed' }}\"",
+          "    action:",
+          "      - service: light.turn_on",
+          "        target:",
+          `          entity_id: ${yamlScalar(entity || "light.replace_me")}`,
+          "        data:",
+          "          brightness_pct: \"{{ trigger.payload_json.val | int(0) }}\""
+        );
+      } else if (role === "cover_position") {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event in ['changed', 'up'] }}\"",
+          "    action:",
+          "      - service: cover.set_cover_position",
+          "        target:",
+          `          entity_id: ${yamlScalar(entity || "cover.replace_me")}`,
+          "        data:",
+          "          position: \"{{ trigger.payload_json.val | int(0) }}\""
+        );
+      } else if (role === "cover_open" || role === "cover_close") {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event in ['up', 'long'] }}\"",
+          "    action:",
+          `      - service: ${role === "cover_open" ? "cover.open_cover" : "cover.close_cover"}`,
+          "        target:",
+          `          entity_id: ${yamlScalar(entity || "cover.replace_me")}`
+        );
+      } else if (role === "scene_confirm") {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event in ['up', 'long'] }}\"",
+          "    action:"
+        );
+        if (entity) {
+          lines.push("      - service: scene.turn_on", "        target:", `          entity_id: ${yamlScalar(entity)}`);
+        } else {
+          lines.push(
+            "      - service: persistent_notification.create",
+            "        data:",
+            `          title: ${yamlScalar(binding.name || "openHASP action")}`,
+            `          message: ${yamlScalar(`Confirmation requested from ${address}`)}`
+          );
+        }
+      } else if (role === "select_option") {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event == 'changed' }}\"",
+          "    action:",
+          "      - service: select.select_option",
+          "        target:",
+          `          entity_id: ${yamlScalar(entity || "select.replace_me")}`,
+          "        data:",
+          "          option: \"{{ trigger.payload_json.text | default(trigger.payload_json.val) }}\""
+        );
+      } else if (role === "state_label") {
+        lines.push(
+          "    action:",
+          "      - service: mqtt.publish",
+          "        data:",
+          `          topic: ${yamlScalar(mqttTopicForAddress(address, "command") + ".text")}`,
+          `          payload: "{{ states('${entity || "sensor.replace_me"}') }}"`
+        );
+      } else {
+        lines.push(
+          "    condition:",
+          "      - condition: template",
+          "        value_template: \"{{ trigger.payload_json.event in ['up', 'long', 'changed'] }}\"",
+          "    action:"
+        );
+        if (service) {
+          lines.push(`      - service: ${service}`);
+          if (entity) lines.push("        target:", `          entity_id: ${yamlScalar(entity)}`);
+          if (binding.data && typeof binding.data === "object") lines.push("        data:", yamlObject(binding.data, 10));
+        } else {
+          lines.push(
+            "      - service: persistent_notification.create",
+            "        data:",
+            `          title: ${yamlScalar("Unmapped openHASP action")}`,
+            `          message: ${yamlScalar(`${address} needs a service/entity binding`)}`
+          );
+        }
+      }
+      return lines.join("\n");
+    }
+
+    function generateHomeAssistantYaml() {
+      const bindingsConfig = parseExportBindings();
+      const prefix = safeId(els.exportAutomationPrefix.value || "openhasp");
+      const node = els.exportMqttNode.value.trim() || els.mqttNode.value.trim() || "pantalla";
+      const base = els.exportMqttBaseTopic.value.trim() || "hasp";
+      const broker = els.exportBrokerHost.value.trim() || "homeassistant.local";
+      const port = Number(els.exportBrokerPort.value) || 1883;
+      const username = els.exportBrokerUsername.value.trim();
+      const password = els.exportBrokerPassword.value.trim();
+      const entries = Object.entries(bindingsConfig.bindings).sort(([a], [b]) => a.localeCompare(b));
+      const body = entries.map(([address, binding]) => automationForBinding(address, binding, prefix)).join("\n\n");
+      const lines = [
+        "# Generated by openHASP Editor",
+        `# Device: ${node}`,
+        `# MQTT state base: ${base}/${node}/state/<object>`,
+        `# MQTT command base: ${base}/${node}/command/<object>.<property>`,
+        "#",
+        "# MQTT broker reminder. Configure this once in Home Assistant, not inside every automation:",
+        "# mqtt:",
+        `#   broker: ${broker}`,
+        `#   port: ${port}`
+      ];
+      if (username) lines.push(`#   username: ${username}`);
+      if (password) lines.push("#   password: !secret mqtt_password");
+      return lines.concat([
+        "",
+        "automation:",
+        body || "  []",
+        ""
+      ]).join("\n");
+    }
+
+    function openExportModal() {
+      els.exportMqttNode.value = els.mqttNode.value.trim() || "pantalla";
+      if (!els.exportBindings.value.trim()) els.exportBindings.value = JSON.stringify(detectBindings(), null, 2);
+      els.exportError.textContent = "";
+      els.exportModal.hidden = false;
+    }
+
+    function closeExportModal() {
+      els.exportModal.hidden = true;
+    }
+
+    function generateExportOutput() {
+      try {
+        els.exportOutput.value = generateHomeAssistantYaml();
+        els.exportError.textContent = "";
+      } catch (error) {
+        els.exportOutput.value = "";
+        els.exportError.textContent = error.message;
+      }
+    }
+
+    function downloadHomeAssistantYaml() {
+      if (!els.exportOutput.value.trim()) generateExportOutput();
+      if (!els.exportOutput.value.trim()) return;
+      const blob = new Blob([els.exportOutput.value], { type: "text/yaml;charset=utf-8" });
+      const anchor = document.createElement("a");
+      anchor.href = URL.createObjectURL(blob);
+      anchor.download = els.exportFilename.value.trim() || "openhasp_homeassistant_automations.yaml";
+      anchor.click();
+      URL.revokeObjectURL(anchor.href);
+    }
+
     function attachEditorInteractions(el, item) {
       if (!isInspectable(item)) return;
       el.addEventListener("click", event => {
@@ -2317,6 +2732,18 @@
 
     els.fileSelect.addEventListener("change", loadSelectedFile);
     els.reloadBtn.addEventListener("click", loadSelectedFile);
+    els.openExportBtn.addEventListener("click", openExportModal);
+    els.closeExportBtn.addEventListener("click", closeExportModal);
+    els.exportModal.addEventListener("click", event => {
+      if (event.target === els.exportModal) closeExportModal();
+    });
+    els.detectBindingsBtn.addEventListener("click", () => {
+      els.exportBindings.value = JSON.stringify(detectBindings(), null, 2);
+      els.exportError.textContent = "";
+    });
+    els.loadExampleBindingsBtn.addEventListener("click", loadExampleBindings);
+    els.generateHaYamlBtn.addEventListener("click", generateExportOutput);
+    els.downloadHaYamlBtn.addEventListener("click", downloadHomeAssistantYaml);
     els.screen.addEventListener("click", () => selectItem(null));
     els.resolutionPreset.addEventListener("change", applyResolutionPreset);
     els.screenWidth.addEventListener("change", syncCustomResolution);
@@ -2354,6 +2781,11 @@
     els.pageDownloadBtn.addEventListener("click", downloadJsonl);
     els.deletePageBtn.addEventListener("click", deleteCurrentPage);
     window.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !els.exportModal.hidden) {
+        event.preventDefault();
+        closeExportModal();
+        return;
+      }
       if (event.key === "Alt" && !state.showMeasurements) {
         state.showMeasurements = true;
         render();
