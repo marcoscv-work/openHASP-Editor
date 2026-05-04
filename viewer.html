@@ -512,6 +512,12 @@
       box-shadow: 0 0 0 1px rgba(4, 10, 16, 0.72);
     }
 
+    .measure-target {
+      position: absolute;
+      border: 1px solid rgba(78, 195, 163, 0.95);
+      box-shadow: 0 0 0 1px rgba(4, 10, 16, 0.72);
+    }
+
     .measure-line {
       position: absolute;
       background: rgba(158, 208, 255, 0.9);
@@ -1276,6 +1282,7 @@
       selectedUid: null,
       selectedUids: [],
       showMeasurements: false,
+      hoveredUid: null,
       uidCounter: 1,
       undoStack: [],
       redoStack: []
@@ -1807,13 +1814,23 @@
       if (!isInspectable(item)) return;
       el.classList.add("inspectable");
       el.addEventListener("mouseenter", event => {
+        state.hoveredUid = item.__uid;
         els.tooltip.innerHTML = tooltipHtml(item, page);
         els.tooltip.style.display = "block";
         moveTooltip(event);
+        if (state.showMeasurements) render();
       });
-      el.addEventListener("mousemove", moveTooltip);
+      el.addEventListener("mousemove", event => {
+        if (state.hoveredUid !== item.__uid) {
+          state.hoveredUid = item.__uid;
+          if (state.showMeasurements) render();
+        }
+        moveTooltip(event);
+      });
       el.addEventListener("mouseleave", () => {
+        if (state.hoveredUid === item.__uid) state.hoveredUid = null;
         els.tooltip.style.display = "none";
+        if (state.showMeasurements) render();
       });
     }
 
@@ -3607,6 +3624,69 @@
       overlay.append(line, label);
     }
 
+    function addMeasureBox(overlay, className, bounds) {
+      const box = document.createElement("div");
+      box.className = className;
+      Object.assign(box.style, {
+        left: `${bounds.x}px`,
+        top: `${bounds.y}px`,
+        width: `${bounds.right - bounds.x}px`,
+        height: `${bounds.bottom - bounds.y}px`
+      });
+      overlay.append(box);
+    }
+
+    function hoveredMeasureTarget() {
+      if (!state.hoveredUid || state.selectedUids.includes(state.hoveredUid)) return null;
+      return allItems().find(item => item.__uid === state.hoveredUid) || null;
+    }
+
+    function itemBounds(item) {
+      const box = itemBox(item);
+      return {
+        x: box.x,
+        y: box.y,
+        right: box.x + box.w,
+        bottom: box.y + box.h
+      };
+    }
+
+    function overlapRange(aStart, aEnd, bStart, bEnd) {
+      const start = Math.max(aStart, bStart);
+      const end = Math.min(aEnd, bEnd);
+      return end > start ? { start, end } : null;
+    }
+
+    function renderTargetMeasurements(overlay, selected, target) {
+      const verticalOverlap = overlapRange(selected.y, selected.bottom, target.y, target.bottom);
+      const horizontalOverlap = overlapRange(selected.x, selected.right, target.x, target.right);
+      let rendered = false;
+
+      if (verticalOverlap) {
+        const cross = verticalOverlap.start + (verticalOverlap.end - verticalOverlap.start) / 2;
+        if (selected.right <= target.x) {
+          addMeasureLine(overlay, "horizontal", selected.right, target.x, cross, `${Math.round(target.x - selected.right)}`);
+          rendered = true;
+        } else if (target.right <= selected.x) {
+          addMeasureLine(overlay, "horizontal", target.right, selected.x, cross, `${Math.round(selected.x - target.right)}`);
+          rendered = true;
+        }
+      }
+
+      if (horizontalOverlap) {
+        const cross = horizontalOverlap.start + (horizontalOverlap.end - horizontalOverlap.start) / 2;
+        if (selected.bottom <= target.y) {
+          addMeasureLine(overlay, "vertical", selected.bottom, target.y, cross, `${Math.round(target.y - selected.bottom)}`);
+          rendered = true;
+        } else if (target.bottom <= selected.y) {
+          addMeasureLine(overlay, "vertical", target.bottom, selected.y, cross, `${Math.round(selected.y - target.bottom)}`);
+          rendered = true;
+        }
+      }
+
+      return rendered;
+    }
+
     function renderMeasurements() {
       if (!state.showMeasurements) return;
       const bounds = selectionBounds();
@@ -3621,15 +3701,16 @@
       const overlay = document.createElement("div");
       overlay.className = "measure-overlay";
 
-      const selection = document.createElement("div");
-      selection.className = "measure-selection";
-      Object.assign(selection.style, {
-        left: `${box.x}px`,
-        top: `${box.y}px`,
-        width: `${box.w}px`,
-        height: `${box.h}px`
-      });
-      overlay.append(selection);
+      addMeasureBox(overlay, "measure-selection", bounds);
+
+      const targetItem = hoveredMeasureTarget();
+      const targetBounds = targetItem ? itemBounds(targetItem) : null;
+      const hasTargetMeasurements = targetBounds ? renderTargetMeasurements(overlay, bounds, targetBounds) : false;
+      if (targetBounds && hasTargetMeasurements) {
+        addMeasureBox(overlay, "measure-target", targetBounds);
+        els.screen.append(overlay);
+        return;
+      }
 
       const centerX = box.x + box.w / 2;
       const centerY = box.y + box.h / 2;
